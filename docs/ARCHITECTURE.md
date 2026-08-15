@@ -45,8 +45,8 @@ Une application web classique ne peut pas charger directement les applications G
 ### Contexte
 
 - identifiant UUID indépendant des outils sources ;
-- titre, résumé, type métier, statut et priorité ;
-- responsable, échéance, couleur et étiquettes ;
+- titre et description ;
+- champs historiques de catégorisation conservés uniquement pour compatibilité API et non exposés dans l’interface ;
 - dates de création et de mise à jour.
 
 ### Référence de ressource

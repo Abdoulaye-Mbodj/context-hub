@@ -11,6 +11,6 @@ Cette extension Manifest V3 s’utilise indépendamment de l’interface web Con
 5. Cliquer sur l’icône Context Hub, puis épingler le panneau si nécessaire.
 6. Dans les paramètres du panneau, saisir l’URL du Hub et l’URL Odoo.
 
-Si une ancienne version est déjà installée, remplacer son dossier puis cliquer sur **Actualiser** dans la fiche de l’extension. La version courante est `0.4.1`.
+Si une ancienne version est déjà installée, remplacer son dossier puis cliquer sur **Actualiser** dans la fiche de l’extension. La version courante est `0.5.0`.
 
 Le bouton flottant **Rattacher au contexte** est injecté uniquement dans les applications Google déclarées et dans l’origine Odoo explicitement autorisée par l’utilisateur. Le panneau permet soit de rechercher et choisir un contexte, soit d’en créer un ; dans ce second cas, la ressource courante est rattachée automatiquement.

@@ -5,11 +5,11 @@ const state = {
   contexts: [],
   connectors: {},
   query: "",
-  status: "",
   selectedId: null,
   selectedIds: new Set(),
   view: "contexts",
   browser: { status: null, contexts: [], selectedId: null, resource: null, app: "" },
+  resourcePicker: { source: "gmail", results: [], selected: null, requestId: 0 },
 };
 let browserResourcePoll = null;
 
@@ -20,13 +20,8 @@ const sourceMeta = {
   calendar: { label: "Calendar", icon: "i-calendar" },
   odoo: { label: "Odoo", icon: "i-odoo" },
 };
-const typeLabels = { project: "Projet", client: "Client", opportunity: "Opportunité", activity: "Activité", topic: "Sujet" };
-const statusLabels = { active: "Actif", watching: "À suivre", archived: "Archivé" };
-
 function icon(id) { return `<svg aria-hidden="true"><use href="#${id}"></use></svg>`; }
 function escapeHtml(value = "") { const node = document.createElement("div"); node.textContent = String(value); return node.innerHTML; }
-function initials(name = "") { return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "CH"; }
-function formatDate(value) { return value ? new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric" }).format(new Date(value)) : "Sans échéance"; }
 function relativeDate(value) {
   if (!value) return "jamais";
   const delta = new Date(value).getTime() - Date.now();
@@ -67,10 +62,9 @@ function renderSourceSummary() {
 function contextRow(context) {
   return `<article class="context-row" data-id="${context.id}" tabindex="0" style="--context-color:${escapeHtml(context.color)}">
     <label class="context-select" title="Sélectionner ${escapeHtml(context.title)}"><input type="checkbox" data-select-context="${context.id}" ${state.selectedIds.has(context.id) ? "checked" : ""} aria-label="Sélectionner ${escapeHtml(context.title)}"></label>
-    <div class="context-main"><span class="context-type"><i></i>${typeLabels[context.context_type] || context.context_type}</span><h2>${escapeHtml(context.title)}</h2><p>${escapeHtml(context.summary || "Aucun résumé")}</p></div>
-    <div class="context-owner"><span class="avatar" style="background:${escapeHtml(context.color)}">${initials(context.owner_name)}</span><div><strong>${escapeHtml(context.owner_name || "Non assigné")}</strong><small>${statusLabels[context.status] || context.status}</small></div></div>
+    <div class="context-main"><h2>${escapeHtml(context.title)}</h2><p>${escapeHtml(context.summary || "Espace de ressources")}</p></div>
     <div class="context-resources"><div class="resource-sources">${sourceIcons(context)}</div><small>${context.resource_count} ressource${context.resource_count !== 1 ? "s" : ""}</small></div>
-    <div class="context-date">${formatDate(context.due_at)}</div>
+    <div class="context-date">Modifié ${relativeDate(context.updated_at)}</div>
     <div class="context-row-actions"><button class="row-delete" data-delete-context-row="${context.id}" title="Supprimer" aria-label="Supprimer ${escapeHtml(context.title)}">${icon("i-trash")}</button><span class="row-arrow">${icon("i-external")}</span></div>
   </article>`;
 }
@@ -107,7 +101,6 @@ function renderContexts() {
 async function loadContexts() {
   const params = new URLSearchParams();
   if (state.query) params.set("q", state.query);
-  if (state.status) params.set("status", state.status);
   try { state.contexts = await api(`/api/v1/contexts?${params}`); renderContexts(); }
   catch (error) { toast(error.message, true); }
 }
@@ -118,11 +111,11 @@ function resourceItem(resource, contextId) {
 }
 
 function renderDrawer(context) {
-  const resources = context.resources.length ? context.resources.map((resource) => resourceItem(resource, context.id)).join("") : `<div class="drawer-empty">Aucune ressource rattachée. Ouvrez une application ou ajoutez un lien.</div>`;
-  $("#drawer-content").innerHTML = `<div class="drawer-hero"><div class="drawer-toolbar"><span class="context-type"><i></i>${typeLabels[context.context_type] || context.context_type}</span><button class="icon-button drawer-close" aria-label="Fermer">${icon("i-close")}</button></div><div class="drawer-title-row"><h2>${escapeHtml(context.title)}</h2><button class="icon-button edit-context" title="Modifier" aria-label="Modifier le contexte">${icon("i-edit")}</button></div><p>${escapeHtml(context.summary || "Aucun résumé")}</p><div class="drawer-tags">${context.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}<span>${escapeHtml(context.owner_name || "Non assigné")}</span><span>${statusLabels[context.status] || context.status}</span></div></div><div class="drawer-body"><div class="drawer-section-head"><div><h3>Ressources rattachées</h3><small>${context.resource_count} raccourci${context.resource_count !== 1 ? "s" : ""} · aucune copie</small></div><button class="secondary-button" id="add-resource">${icon("i-plus")}Ajouter un lien</button></div><div class="resource-list">${resources}</div></div>`;
+  const resources = context.resources.length ? context.resources.map((resource) => resourceItem(resource, context.id)).join("") : `<div class="drawer-empty">Aucune ressource rattachée. Choisissez un élément dans Gmail, Chat, Drive, Calendar ou Odoo.</div>`;
+  $("#drawer-content").innerHTML = `<div class="drawer-hero"><div class="drawer-toolbar"><span class="drawer-kicker">CONTEXTE</span><button class="icon-button drawer-close" aria-label="Fermer">${icon("i-close")}</button></div><div class="drawer-title-row"><h2>${escapeHtml(context.title)}</h2><button class="icon-button edit-context" title="Modifier" aria-label="Modifier le contexte">${icon("i-edit")}</button></div><p>${escapeHtml(context.summary || "Espace centralisant des ressources provenant de plusieurs sources.")}</p></div><div class="drawer-body"><div class="drawer-section-head"><div><h3>Ressources</h3><small>${context.resource_count} raccourci${context.resource_count !== 1 ? "s" : ""} · les données restent dans leur source</small></div><button class="secondary-button" id="add-resource">${icon("i-plus")}Choisir une ressource</button></div><div class="resource-list">${resources}</div></div>`;
   $(".drawer-close").addEventListener("click", closeDrawer);
   $(".edit-context").addEventListener("click", () => openContextModal(context));
-  $("#add-resource").addEventListener("click", () => openModal("resource-modal"));
+  $("#add-resource").addEventListener("click", openResourceModal);
   $$('[data-delete-resource]').forEach((button) => button.addEventListener("click", removeResource));
   $$('[data-integrated-url]', $("#drawer-content")).forEach((link) => link.addEventListener("click", (event) => { event.preventDefault(); openEmbeddedUrl(link.dataset.integratedUrl, link.dataset.integratedApp); }));
 }
@@ -157,9 +150,7 @@ function openContextModal(context = null) {
   $("#context-modal-title").textContent = context ? context.title : "Créer un contexte";
   $("#delete-context").classList.toggle("hidden", !context);
   if (context) {
-    for (const field of ["title", "summary", "context_type", "status", "priority", "owner_name"]) form.elements[field].value = context[field] || "";
-    form.elements.tags.value = (context.tags || []).join(", ");
-    form.elements.due_at.value = context.due_at ? context.due_at.slice(0, 10) : "";
+    for (const field of ["title", "summary"]) form.elements[field].value = context[field] || "";
   }
   openModal("context-modal");
 }
@@ -169,8 +160,6 @@ async function saveContext(event) {
   const form = event.currentTarget;
   const values = Object.fromEntries(new FormData(form));
   const id = values.context_id; delete values.context_id;
-  values.tags = values.tags.split(",").map((tag) => tag.trim()).filter(Boolean);
-  if (values.due_at) values.due_at = `${values.due_at}T17:00:00Z`; else delete values.due_at;
   const button = $("button[type=submit]", form); button.disabled = true;
   try {
     const context = await api(id ? `/api/v1/contexts/${id}` : "/api/v1/contexts", { method: id ? "PATCH" : "POST", body: JSON.stringify(values) });
@@ -201,11 +190,67 @@ async function deleteContexts(ids) {
   } catch (error) { toast(error.message, true); }
 }
 
+function resourceResultItem(resource, index) {
+  const meta = sourceMeta[resource.source] || { label: resource.source, icon: "i-link" };
+  const selected = state.resourcePicker.selected === index;
+  return `<button type="button" class="resource-search-result ${selected ? "selected" : ""}" data-resource-index="${index}"><span class="mini-source ${resource.source}">${icon(meta.icon)}</span><span><strong>${escapeHtml(resource.title)}</strong><small>${escapeHtml(resource.excerpt || meta.label)}</small></span><i>${selected ? "Sélectionné" : "Choisir"}</i></button>`;
+}
+
+function renderResourceResults() {
+  $("#resource-search-results").innerHTML = state.resourcePicker.results.map(resourceResultItem).join("");
+  $("#attach-selected-resource").disabled = state.resourcePicker.selected === null;
+  $$('[data-resource-index]').forEach((button) => button.addEventListener("click", () => {
+    state.resourcePicker.selected = Number(button.dataset.resourceIndex);
+    renderResourceResults();
+  }));
+}
+
+async function searchResources() {
+  const requestId = ++state.resourcePicker.requestId;
+  const query = $("#resource-search").value.trim();
+  $("#resource-search-state").textContent = `Recherche dans ${sourceMeta[state.resourcePicker.source].label}…`;
+  $("#resource-search-results").innerHTML = `<div class="resource-results-loader"><span></span><span></span><span></span></div>`;
+  state.resourcePicker.selected = null;
+  $("#attach-selected-resource").disabled = true;
+  try {
+    const results = await api(`/api/v1/resources/search?source=${state.resourcePicker.source}&q=${encodeURIComponent(query)}`);
+    if (requestId !== state.resourcePicker.requestId) return;
+    state.resourcePicker.results = results;
+    $("#resource-search-state").textContent = results.length ? `${results.length} résultat${results.length !== 1 ? "s" : ""}` : "Aucune ressource trouvée. Essayez une autre recherche.";
+    renderResourceResults();
+  } catch (error) {
+    if (requestId !== state.resourcePicker.requestId) return;
+    state.resourcePicker.results = [];
+    $("#resource-search-results").innerHTML = "";
+    $("#resource-search-state").textContent = error.message;
+    toast(error.message, true);
+  }
+}
+
+function setResourceSource(source, runSearch = true) {
+  state.resourcePicker.source = source;
+  state.resourcePicker.selected = null;
+  $$('[data-resource-source]').forEach((button) => button.classList.toggle("active", button.dataset.resourceSource === source));
+  $("#resource-search").placeholder = `Rechercher dans ${sourceMeta[source].label}…`;
+  if (runSearch) searchResources();
+}
+
+function openResourceModal() {
+  state.resourcePicker.results = [];
+  state.resourcePicker.selected = null;
+  $("#resource-search").value = "";
+  $("#resource-search-results").innerHTML = "";
+  setResourceSource("gmail", false);
+  openModal("resource-modal");
+  searchResources();
+}
+
 async function saveResource(event) {
-  event.preventDefault(); if (!state.selectedId) return;
-  const form = event.currentTarget; const values = Object.fromEntries(new FormData(form)); values.resource_type = "item";
-  const button = $("button[type=submit]", form); button.disabled = true;
-  try { await api(`/api/v1/contexts/${state.selectedId}/resources`, { method: "POST", body: JSON.stringify(values) }); closeModal(button); form.reset(); toast("Ressource rattachée"); await Promise.all([openContext(state.selectedId), loadContexts()]); }
+  event.preventDefault();
+  const resource = state.resourcePicker.results[state.resourcePicker.selected];
+  if (!state.selectedId || !resource) return;
+  const button = $("#attach-selected-resource"); button.disabled = true;
+  try { await api(`/api/v1/contexts/${state.selectedId}/resources`, { method: "POST", body: JSON.stringify(resource) }); closeModal(button); toast("Ressource rattachée"); await Promise.all([openContext(state.selectedId), loadContexts()]); }
   catch (error) { toast(error.message, true); } finally { button.disabled = false; }
 }
 
@@ -223,6 +268,7 @@ function showView(view) {
   $("#settings-view").classList.toggle("hidden", view !== "settings");
   $("#search").disabled = view !== "contexts";
   $("#create-context").classList.toggle("hidden", view === "applications");
+  document.body.classList.toggle("applications-mode", view === "applications");
   $$(".nav-button[data-view]").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
   $$(".integrated-app-button").forEach((button) => button.classList.toggle("active", view === "applications" && button.dataset.app === state.browser.app));
   $(".sidebar").classList.remove("open");
@@ -318,6 +364,15 @@ function setBrowserResource(resource) {
   $("#browser-attach").disabled = !resource || !state.browser.selectedId;
 }
 
+function toggleBrowserPanel(force) {
+  const workspace = $(".browser-workspace");
+  const open = typeof force === "boolean" ? force : workspace.classList.contains("panel-collapsed");
+  workspace.classList.toggle("panel-collapsed", !open);
+  $("#browser-panel-toggle").classList.toggle("active", open);
+  $("#browser-panel-toggle").setAttribute("aria-expanded", String(open));
+  if (open) Promise.all([refreshBrowserResource(), loadBrowserContexts($("#browser-context-search").value.trim())]);
+}
+
 async function loadBrowserStatus() {
   try {
     const status = await api("/api/v1/browser/status");
@@ -327,7 +382,7 @@ async function loadBrowserStatus() {
       frame.dataset.url = status.public_url;
       frame.src = status.public_url;
     }
-    $("#browser-status").textContent = status.ready ? "Chromium Docker connecté · profil persistant" : "Chromium Docker démarre…";
+    $("#browser-status").textContent = status.ready ? "Session navigateur séparée · cookies conservés dans ce profil" : "Chromium Docker démarre…";
     setBrowserResource(status.current);
     return status;
   } catch (error) {
@@ -353,7 +408,7 @@ async function refreshBrowserResource(silent = false) {
 }
 
 function renderBrowserContexts() {
-  $("#browser-context-list").innerHTML = state.browser.contexts.map((context) => `<label class="browser-context-choice ${context.id === state.browser.selectedId ? "selected" : ""}" data-id="${context.id}"><input type="radio" name="browser-context" ${context.id === state.browser.selectedId ? "checked" : ""}><span><strong>${escapeHtml(context.title)}</strong><small>${escapeHtml(context.summary || typeLabels[context.context_type] || context.context_type)}</small></span><em>${context.resource_count}</em></label>`).join("");
+  $("#browser-context-list").innerHTML = state.browser.contexts.map((context) => `<label class="browser-context-choice ${context.id === state.browser.selectedId ? "selected" : ""}" data-id="${context.id}"><input type="radio" name="browser-context" ${context.id === state.browser.selectedId ? "checked" : ""}><span><strong>${escapeHtml(context.title)}</strong><small>${escapeHtml(context.summary || "Espace de ressources")}</small></span><em>${context.resource_count}</em></label>`).join("");
   $("#browser-context-empty").classList.toggle("hidden", state.browser.contexts.length !== 0);
   $$(".browser-context-choice").forEach((choice) => choice.addEventListener("click", () => { state.browser.selectedId = choice.dataset.id; renderBrowserContexts(); $("#browser-attach").disabled = !state.browser.resource; }));
 }
@@ -425,6 +480,7 @@ function bindEvents() {
   $("#select-all-contexts").addEventListener("change", (event) => { state.contexts.forEach((context) => { if (event.currentTarget.checked) state.selectedIds.add(context.id); else state.selectedIds.delete(context.id); }); renderContexts(); });
   $("#delete-selected-contexts").addEventListener("click", () => deleteContexts([...state.selectedIds]));
   $("#browser-refresh").addEventListener("click", refreshBrowserResource);
+  $("#browser-panel-toggle").addEventListener("click", () => toggleBrowserPanel());
   $("#browser-context-refresh").addEventListener("click", () => Promise.all([refreshBrowserResource(), loadBrowserContexts($("#browser-context-search").value.trim())]));
   $("#browser-attach").addEventListener("click", attachBrowserResource);
   $("#browser-create-toggle").addEventListener("click", () => $("#browser-create-form").classList.toggle("hidden"));
@@ -433,7 +489,9 @@ function bindEvents() {
   let browserSearchTimer;
   $("#browser-context-search").addEventListener("input", (event) => { clearTimeout(browserSearchTimer); browserSearchTimer = setTimeout(() => loadBrowserContexts(event.target.value.trim()), 220); });
   $("#mobile-menu").addEventListener("click", () => $(".sidebar").classList.toggle("open"));
-  $$(".segmented button").forEach((button) => button.addEventListener("click", () => { $$(".segmented button").forEach((item) => item.classList.remove("active")); button.classList.add("active"); state.status = button.dataset.filter; loadContexts(); }));
+  $$('[data-resource-source]').forEach((button) => button.addEventListener("click", () => setResourceSource(button.dataset.resourceSource)));
+  $("#resource-search-button").addEventListener("click", searchResources);
+  $("#resource-search").addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); searchResources(); } });
   let searchTimer;
   $("#search").addEventListener("input", (event) => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { state.query = event.target.value.trim(); loadContexts(); }, 220); });
   $("#google-form").addEventListener("submit", configureGoogle);

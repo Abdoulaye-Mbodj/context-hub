@@ -21,7 +21,7 @@ class Context(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_id)
     title: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
     summary: Mapped[str] = mapped_column(Text, default="", nullable=False)
-    context_type: Mapped[str] = mapped_column(String(32), default="project", index=True)
+    context_type: Mapped[str] = mapped_column(String(32), default="topic", index=True)
     status: Mapped[str] = mapped_column(String(32), default="active", index=True)
     priority: Mapped[str] = mapped_column(String(16), default="normal")
     owner_name: Mapped[str] = mapped_column(String(120), default="")

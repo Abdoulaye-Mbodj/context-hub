@@ -51,7 +51,7 @@ def _context_card(item, compact: bool = False) -> dict[str, Any]:
         },
     ]
     return {
-        "header": {"title": item.title, "subtitle": item.context_type.capitalize()},
+        "header": {"title": item.title, "subtitle": "Contexte de ressources"},
         "sections": [{"widgets": widgets}],
         "name": f"context-{item.id}" if not compact else "context-summary",
     }
@@ -60,7 +60,7 @@ def _context_card(item, compact: bool = False) -> dict[str, Any]:
 @router.post("/workspace/home")
 def workspace_home(_event: dict[str, Any], db: Session = Depends(get_db)):
     settings = get_settings()
-    contexts = list_contexts(db, context_status="active", limit=5)
+    contexts = list_contexts(db, limit=5)
     widgets: list[dict[str, Any]] = [
         {
             "textParagraph": {
@@ -73,7 +73,7 @@ def workspace_home(_event: dict[str, Any], db: Session = Depends(get_db)):
             {
                 "decoratedText": {
                     "text": f"<b>{item.title}</b>",
-                    "bottomLabel": f"{item.resource_count} ressources · {item.context_type}",
+                    "bottomLabel": f"{item.resource_count} ressources",
                     "onClick": {"openLink": {"url": f"{settings.app_public_url}/?context={item.id}"}},
                 }
             }
@@ -87,7 +87,7 @@ def workspace_home(_event: dict[str, Any], db: Session = Depends(get_db)):
     )
     return _workspace_response(
         {
-            "header": {"title": "Context Hub", "subtitle": "Vos contextes actifs"},
+            "header": {"title": "Context Hub", "subtitle": "Vos contextes"},
             "sections": [{"widgets": widgets}],
         }
     )
@@ -139,7 +139,7 @@ def workspace_contextual(event: dict[str, Any], db: Session = Depends(get_db)):
     if matches:
         return _workspace_response(_context_card(serialize_context(matches[0]), compact=True))
 
-    contexts = list_contexts(db, context_status="active", limit=25)
+    contexts = list_contexts(db, limit=25)
     selection_items = [
         {"text": context.title, "value": context.id, "selected": index == 0}
         for index, context in enumerate(contexts)

@@ -62,17 +62,11 @@
 
         <section class="page" id="contexts-view">
           <div class="page-heading">
-            <div><span class="eyebrow">ESPACE CONTEXTUEL</span><h1>Contextes</h1><p>Créez un sujet, puis rattachez-y ce que vous consultez dans vos applications.</p></div>
+            <div><span class="eyebrow">ESPACE CONTEXTUEL</span><h1>Contextes</h1><p>Créez un espace, puis centralisez-y les ressources de vos différentes applications.</p></div>
             <div class="source-summary" id="source-summary"></div>
           </div>
 
           <div class="context-toolbar">
-            <div class="segmented">
-              <button class="active" data-filter="">Tous</button>
-              <button data-filter="active">Actifs</button>
-              <button data-filter="watching">À suivre</button>
-              <button data-filter="archived">Archivés</button>
-            </div>
             <div class="selection-tools">
               <label class="select-all"><input id="select-all-contexts" type="checkbox"/><span>Tout sélectionner</span></label>
               <div class="bulk-actions hidden" id="bulk-actions"><strong id="selected-count">0 sélectionné</strong><button class="danger-button compact" id="delete-selected-contexts"><svg><use href="#i-trash"></use></svg>Supprimer</button></div>
@@ -87,9 +81,9 @@
         <section class="browser-page hidden" id="applications-view">
           <div class="browser-toolbar">
             <div><span class="eyebrow">NAVIGATEUR INTÉGRÉ</span><h1 id="browser-app-title">Applications</h1><p id="browser-status">Démarrage de Chromium…</p></div>
-            <div class="browser-toolbar-actions"><button class="secondary-button" id="browser-refresh"><svg><use href="#i-refresh"></use></svg>Actualiser la page détectée</button></div>
+            <div class="browser-toolbar-actions"><button class="secondary-button" id="browser-refresh"><svg><use href="#i-refresh"></use></svg>Actualiser</button><button class="primary-button" id="browser-panel-toggle" aria-expanded="false"><svg><use href="#i-link"></use></svg>Contextualiser</button></div>
           </div>
-          <div class="browser-workspace">
+          <div class="browser-workspace panel-collapsed">
             <div class="browser-frame-wrap">
               <div class="browser-loader" id="browser-loader"><span></span><strong>Chromium démarre dans Docker</strong><small>Le premier lancement peut prendre une minute.</small></div>
               <iframe id="embedded-browser" title="Navigateur Chromium intégré" allow="autoplay; microphone; camera; clipboard-read; clipboard-write; window-management" referrerpolicy="no-referrer"></iframe>
@@ -104,7 +98,6 @@
               <button class="secondary-button browser-create-toggle" id="browser-create-toggle"><svg><use href="#i-plus"></use></svg>Créer un contexte</button>
               <form class="browser-create-form hidden" id="browser-create-form">
                 <label>Nom<input name="title" required minlength="2" placeholder="Nom du contexte"/></label>
-                <label>Type<select name="context_type"><option value="project">Projet</option><option value="client">Client</option><option value="opportunity">Opportunité</option><option value="activity">Activité</option><option value="topic">Sujet</option></select></label>
                 <label>Résumé<textarea name="summary" rows="2" placeholder="Résumé facultatif"></textarea></label>
                 <button class="primary-button" type="submit">Créer et rattacher</button>
               </form>
@@ -113,8 +106,8 @@
         </section>
 
         <section class="page hidden" id="settings-view">
-          <div class="page-heading settings-heading"><div><span class="eyebrow">CONFIGURATION</span><h1>Interconnexions</h1><p>Connectez vos outils une fois. Les identifiants sont chiffrés avant stockage.</p></div></div>
-          <div class="security-note"><svg><use href="#i-shield"></use></svg><div><strong>Secrets chiffrés côté serveur</strong><p>OAuth est utilisé pour Google. Odoo accepte une clé API dédiée. Aucune donnée source complète n’est recopiée.</p></div></div>
+          <div class="page-heading settings-heading"><div><span class="eyebrow">CONFIGURATION</span><h1>Interconnexions</h1><p>Connectez vos sources pour rechercher et rattacher leurs ressources directement depuis le Hub.</p></div></div>
+          <div class="security-note"><svg><use href="#i-shield"></use></svg><div><strong>Accès API sécurisé, session web séparée</strong><p>OAuth Google et la clé API Odoo alimentent la recherche du Hub. Ils ne peuvent pas créer les cookies de connexion de Chromium : la première connexion dans l’interface web reste distincte, puis son profil navigateur persistant conserve la session.</p></div></div>
 
           <div class="connector-grid">
             <article class="connector-card" data-provider="google">
@@ -123,7 +116,7 @@
               <div class="connector-stats hidden" id="google-stats"></div>
               <div class="connector-error hidden" id="google-error"></div>
               <form class="connector-form" id="google-form">
-                <div class="form-help"><strong>Client OAuth de type « Application Web »</strong><span>URI de redirection à déclarer :</span><code id="google-redirect-uri">http://localhost:8080/api/v1/connectors/google/callback</code></div>
+                <div class="form-help"><strong>Client OAuth de type « Application Web »</strong><span>Activez Gmail API, Google Drive API, Google Calendar API et Google Chat API dans ce même projet Google Cloud.</span><span>URI de redirection à déclarer :</span><code id="google-redirect-uri">http://localhost:8080/api/v1/connectors/google/callback</code></div>
                 <label>Client ID<input name="client_id" autocomplete="off" required placeholder="….apps.googleusercontent.com"/></label>
                 <label>Client secret<input name="client_secret" type="password" autocomplete="new-password" required placeholder="GOCSPX-…"/></label>
                 <div class="form-actions"><button type="submit" class="secondary-button">Enregistrer</button><button type="button" class="primary-button hidden" id="google-connect">Ouvrir la connexion Google</button></div>
@@ -148,7 +141,7 @@
 
           <article class="extension-card">
             <div class="extension-icon"><svg><use href="#i-extension"></use></svg></div>
-            <div><span class="eyebrow">EXTENSION INDÉPENDANTE</span><h2>Extension Context Hub pour Chrome / Edge</h2><p>L’extension ne modifie jamais la navigation du Hub. Ouvrez-la directement depuis l’icône des extensions Chrome/Edge lorsque vous souhaitez afficher le panneau Context Hub à côté d’une application ouverte dans votre navigateur.</p><ol><li><a class="extension-download" href="/browser-extension.zip">Téléchargez l’extension</a> puis décompressez l’archive.</li><li>Ouvrez <code>chrome://extensions</code> et activez le mode développeur.</li><li>Choisissez « Charger l’extension non empaquetée » puis le dossier <code>browser-extension</code>. Si elle est déjà installée, remplacez le dossier puis cliquez sur « Actualiser ».</li><li>Épinglez l’icône Context Hub pour pouvoir ouvrir le panneau quand vous le souhaitez. Version actuelle : <strong>0.4.1</strong>.</li></ol></div>
+            <div><span class="eyebrow">EXTENSION INDÉPENDANTE</span><h2>Extension Context Hub pour Chrome / Edge</h2><p>L’extension ne modifie jamais la navigation du Hub. Ouvrez-la depuis l’icône puzzle lorsque vous souhaitez contextualiser une page dans votre navigateur habituel.</p><div class="extension-warning"><strong>Télécharger ne suffit pas à l’installer.</strong> Chrome interdit à une application web d’installer silencieusement une extension : elle n’apparaît dans la liste qu’après le chargement manuel ci-dessous.</div><ol><li><a class="extension-download" href="/browser-extension.zip">Téléchargez l’extension</a> puis décompressez l’archive.</li><li>Ouvrez <code>chrome://extensions</code> et activez le mode développeur.</li><li>Choisissez « Charger l’extension non empaquetée » puis le dossier <code>browser-extension</code>.</li><li>Dans l’icône puzzle, épinglez <strong>Context Hub</strong>. Version actuelle : <strong>0.5.0</strong>.</li></ol></div>
           </article>
         </section>
       </main>
@@ -163,11 +156,7 @@
         <form id="context-form">
           <input type="hidden" name="context_id"/>
           <label>Nom du contexte<input name="title" required minlength="2" placeholder="Ex. Renouvellement · Client Horizon"/></label>
-          <label>Résumé<textarea name="summary" rows="3" placeholder="Objectif, périmètre et informations importantes…"></textarea></label>
-          <div class="two-columns"><label>Type<select name="context_type"><option value="project">Projet</option><option value="client">Client</option><option value="opportunity">Opportunité</option><option value="activity">Activité</option><option value="topic">Sujet</option></select></label><label>Statut<select name="status"><option value="active">Actif</option><option value="watching">À suivre</option><option value="archived">Archivé</option></select></label></div>
-          <div class="two-columns"><label>Priorité<select name="priority"><option value="normal">Normale</option><option value="high">Haute</option><option value="low">Basse</option></select></label><label>Échéance<input name="due_at" type="date"/></label></div>
-          <label>Responsable<input name="owner_name" placeholder="Nom du responsable"/></label>
-          <label>Étiquettes <small>séparées par des virgules</small><input name="tags" placeholder="Enterprise, Renouvellement, EMEA"/></label>
+          <label>Description<textarea name="summary" rows="5" placeholder="Décrivez simplement ce que ce contexte regroupe…"></textarea></label>
           <div class="modal-actions"><button type="button" class="danger-button hidden" id="delete-context"><svg><use href="#i-trash"></use></svg>Supprimer</button><span></span><button type="button" class="text-button modal-close">Annuler</button><button type="submit" class="primary-button">Enregistrer</button></div>
         </form>
       </section>
@@ -175,14 +164,13 @@
 
     <div class="modal-backdrop hidden" id="resource-modal">
       <section class="modal compact" role="dialog" aria-modal="true" aria-labelledby="resource-modal-title">
-        <div class="modal-head"><div><span class="eyebrow">RACCOURCI</span><h2 id="resource-modal-title">Rattacher une ressource</h2></div><button class="icon-button modal-close" type="button" aria-label="Fermer"><svg><use href="#i-close"></use></svg></button></div>
+        <div class="modal-head"><div><span class="eyebrow">RESSOURCES CONNECTÉES</span><h2 id="resource-modal-title">Choisir une ressource</h2><p>Sélectionnez une source, recherchez, puis choisissez l’élément à rattacher.</p></div><button class="icon-button modal-close" type="button" aria-label="Fermer"><svg><use href="#i-close"></use></svg></button></div>
         <form id="resource-form">
-          <label>Source<select name="source"><option value="gmail">Gmail</option><option value="chat">Google Chat</option><option value="drive">Google Drive</option><option value="calendar">Google Calendar</option><option value="odoo">Odoo</option></select></label>
-          <label>Titre<input name="title" required placeholder="Titre de la ressource"/></label>
-          <label>Lien permanent<input name="url" type="url" required placeholder="https://…"/></label>
-          <label>Identifiant source<input name="external_id" required placeholder="ID du fil, fichier, événement ou enregistrement"/></label>
-          <label>Note contextuelle<textarea name="excerpt" rows="2" placeholder="Pourquoi cette ressource est utile…"></textarea></label>
-          <div class="modal-actions"><span></span><button type="button" class="text-button modal-close">Annuler</button><button type="submit" class="primary-button"><svg><use href="#i-link"></use></svg>Rattacher</button></div>
+          <div class="resource-source-picker" role="radiogroup" aria-label="Source"><button type="button" class="active" data-resource-source="gmail"><svg><use href="#i-mail"></use></svg>Gmail</button><button type="button" data-resource-source="chat"><svg><use href="#i-chat"></use></svg>Chat</button><button type="button" data-resource-source="drive"><svg><use href="#i-drive"></use></svg>Drive</button><button type="button" data-resource-source="calendar"><svg><use href="#i-calendar"></use></svg>Calendar</button><button type="button" data-resource-source="odoo"><svg><use href="#i-odoo"></use></svg>Odoo</button></div>
+          <label class="resource-search-field"><svg><use href="#i-search"></use></svg><input id="resource-search" type="search" placeholder="Rechercher dans Gmail…" autocomplete="off"/><button type="button" class="secondary-button" id="resource-search-button">Rechercher</button></label>
+          <div class="resource-search-state" id="resource-search-state">Saisissez quelques mots ou affichez les éléments récents.</div>
+          <div class="resource-search-results" id="resource-search-results"></div>
+          <div class="modal-actions"><span></span><button type="button" class="text-button modal-close">Annuler</button><button type="submit" class="primary-button" id="attach-selected-resource" disabled><svg><use href="#i-link"></use></svg>Rattacher la sélection</button></div>
         </form>
       </section>
     </div>

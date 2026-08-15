@@ -50,7 +50,9 @@ class ActivityRead(BaseModel):
 class ContextCreate(BaseModel):
     title: str = Field(min_length=2, max_length=200)
     summary: str = Field(default="", max_length=5000)
-    context_type: ContextType = "project"
+    # Kept for API/database compatibility. The product no longer asks users to
+    # categorise a context: every new context is a neutral resource container.
+    context_type: ContextType = "topic"
     status: ContextStatus = "active"
     priority: Literal["low", "normal", "high"] = "normal"
     owner_name: str = Field(default="", max_length=120)

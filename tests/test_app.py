@@ -115,7 +115,21 @@ def test_browser_extension_is_downloadable():
             assert "browser-extension/hub-bridge.js" not in archive.namelist()
             assert "browser-extension/workspace.css" in archive.namelist()
             manifest = json.loads(archive.read("browser-extension/manifest.json"))
-            assert manifest["version"] == "0.4.1"
+            assert manifest["version"] == "0.5.0"
+
+
+def test_connected_source_search_endpoint_is_available():
+    with TestClient(app) as client:
+        response = client.get("/api/v1/resources/search", params={"source": "gmail", "q": "test"})
+        assert response.status_code in {400, 502}
+        assert "Google" in response.json()["detail"]
+
+
+def test_context_ui_uses_neutral_contexts_and_source_picker():
+    page = (ROOT_DIR / "app" / "static" / "index.html").read_text(encoding="utf-8")
+    assert 'name="context_type"' not in page
+    assert 'data-resource-source="gmail"' in page
+    assert 'id="resource-search-results"' in page
 
 
 def test_extension_context_creation_keeps_form_reference_across_awaits():

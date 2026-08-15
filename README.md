@@ -68,7 +68,7 @@ En local, le flux graphique est publié uniquement sur `127.0.0.1:3000`. Sur un 
 
 L’extension est entièrement indépendante de l’interface web : les boutons Gmail, Chat, Drive, Calendar et Odoo du Hub ne l’appellent jamais. Pour l’utiliser avec un onglet Chrome/Edge normal, ouvrir ou épingler directement l’icône Context Hub dans la barre des extensions. Le panneau permet de rechercher et sélectionner un contexte existant, ou d’en créer un qui sera immédiatement rattaché à l’élément affiché. Un bouton flottant **Rattacher au contexte** est aussi injecté dans les applications autorisées.
 
-Après une mise à jour de l’extension non empaquetée, remplacer le dossier extrait puis cliquer sur **Actualiser** dans `chrome://extensions`. La version courante est `0.4.1`.
+Après une mise à jour de l’extension non empaquetée, remplacer le dossier extrait puis cliquer sur **Actualiser** dans `chrome://extensions`. La version courante est `0.5.0`.
 
 L’installation d’une extension non empaquetée est adaptée au développement et aux tests. Pour une organisation, publier l’extension de façon privée via Chrome Enterprise ou Microsoft Edge Add-ons.
 
@@ -86,7 +86,7 @@ Les secrets sont chiffrés en base avec `APP_SECRET_KEY`. Ils ne sont jamais ren
 6. Copier le Client ID et le Client secret dans le formulaire, enregistrer, puis cliquer sur **Connecter Google**.
 7. Autoriser la fenêtre OAuth, puis lancer une synchronisation pour vérifier les accès.
 
-Le connecteur demande des accès en lecture aux fils Gmail, métadonnées Drive, événements Calendar et espaces Chat. Certains scopes peuvent exiger une validation Google pour une application externe.
+Le connecteur demande des accès en lecture aux fils Gmail, métadonnées Drive, événements Calendar et espaces Chat. Ces accès alimentent le sélecteur de ressources du Hub ; ils ne créent pas la session web du Chromium intégré. Certains scopes peuvent exiger une validation Google pour une application externe.
 
 ### Odoo
 
@@ -97,7 +97,7 @@ Créer de préférence une clé API dédiée dans Odoo, puis renseigner :
 - l’identifiant utilisateur ;
 - la clé API.
 
-Le bouton **Tester et enregistrer** valide immédiatement l’authentification XML-RPC. La synchronisation récupère uniquement des compteurs de contacts, opportunités et projets ; les fiches restent dans Odoo.
+Le bouton **Tester et enregistrer** valide immédiatement l’authentification XML-RPC. La connexion permet ensuite de rechercher contacts, opportunités, projets et tâches dans le sélecteur de ressources ; les fiches restent dans Odoo.
 
 ## Configuration
 

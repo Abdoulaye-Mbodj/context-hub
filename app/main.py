@@ -14,6 +14,7 @@ from app.config import get_settings
 from app.connectors import router as connectors_router
 from app.database import Base, SessionLocal, engine
 from app.integrations import router as integrations_router
+from app.resource_search import router as resource_search_router
 from app.seed import seed_demo_data
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -33,7 +34,7 @@ async def lifespan(_app: FastAPI):
 settings = get_settings()
 app = FastAPI(
     title=settings.app_name,
-    version="0.4.1",
+    version="0.5.0",
     description="Couche de contextualisation transverse pour Google Workspace et Odoo.",
     lifespan=lifespan,
 )
@@ -48,6 +49,7 @@ app.include_router(api_router)
 app.include_router(browser_router)
 app.include_router(connectors_router)
 app.include_router(integrations_router)
+app.include_router(resource_search_router)
 app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
 
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Context Hub",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Utilisez Gmail, Google Chat, Drive, Calendar et Odoo dans un espace de travail Context Hub unifié.",
   "minimum_chrome_version": "116",
   "permissions": [
