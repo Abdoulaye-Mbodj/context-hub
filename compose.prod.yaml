@@ -1,0 +1,26 @@
+services:
+  app:
+    environment:
+      APP_PUBLIC_URL: https://${CONTEXT_HUB_DOMAIN}
+      DEMO_MODE: "false"
+
+  caddy:
+    image: caddy:2.8-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      CONTEXT_HUB_DOMAIN: ${CONTEXT_HUB_DOMAIN}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

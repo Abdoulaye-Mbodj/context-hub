@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="res_config_settings_view_form_context_hub" model="ir.ui.view">
+    <field name="name">res.config.settings.view.form.context.hub</field>
+    <field name="model">res.config.settings</field>
+    <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//form" position="inside">
+        <app string="Context Hub" name="context_hub">
+          <block title="Connexion">
+            <setting string="URL publique" help="Adresse HTTPS du Context Hub accessible aux utilisateurs Odoo.">
+              <field name="context_hub_url" placeholder="https://context.example.com"/>
+            </setting>
+          </block>
+        </app>
+      </xpath>
+    </field>
+  </record>
+</odoo>

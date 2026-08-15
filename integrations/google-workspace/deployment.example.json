@@ -1,0 +1,45 @@
+{
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/gmail.addons.execute",
+    "https://www.googleapis.com/auth/gmail.addons.current.message.metadata",
+    "https://www.googleapis.com/auth/drive.addons.metadata.readonly",
+    "https://www.googleapis.com/auth/calendar.readonly"
+  ],
+  "addOns": {
+    "common": {
+      "name": "Context Hub",
+      "logoUrl": "https://YOUR_CONTEXT_HUB_DOMAIN/assets/favicon.svg",
+      "openLinkUrlPrefixes": [
+        "https://YOUR_CONTEXT_HUB_DOMAIN/",
+        "https://mail.google.com/",
+        "https://drive.google.com/",
+        "https://calendar.google.com/"
+      ],
+      "homepageTrigger": {
+        "runFunction": "https://YOUR_CONTEXT_HUB_DOMAIN/integrations/workspace/home",
+        "enabled": true
+      }
+    },
+    "gmail": {
+      "contextualTriggers": [
+        {
+          "unconditional": {},
+          "onTriggerFunction": "https://YOUR_CONTEXT_HUB_DOMAIN/integrations/workspace/contextual"
+        }
+      ]
+    },
+    "drive": {
+      "onItemsSelectedTrigger": {
+        "runFunction": "https://YOUR_CONTEXT_HUB_DOMAIN/integrations/workspace/contextual"
+      }
+    },
+    "calendar": {
+      "eventOpenTrigger": {
+        "runFunction": "https://YOUR_CONTEXT_HUB_DOMAIN/integrations/workspace/contextual"
+      }
+    },
+    "httpOptions": {
+      "granularOauthPermissionSupport": "OPT_IN"
+    }
+  }
+}

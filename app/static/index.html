@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Context Hub centralise les références Gmail, Chat, Drive, Calendar et Odoo par contexte métier." />
+    <title>Context Hub</title>
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <svg class="svg-defs" aria-hidden="true">
+      <defs>
+        <symbol id="i-hub" viewBox="0 0 24 24"><path d="M8.2 6.2a3 3 0 1 1-2-2.84A3 3 0 0 1 8.2 6.2Zm11.6 0a3 3 0 1 1-2-2.84 3 3 0 0 1 2 2.84ZM14.9 18a3 3 0 1 1-2-2.82A3 3 0 0 1 14.9 18Z"/><path d="m7.6 8.1 3.2 6.8m5.6-6.8-3.2 6.8M9.1 6.2h5.8" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+        <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+        <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+        <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></symbol>
+        <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+        <symbol id="i-settings" viewBox="0 0 24 24"><path d="M9.2 4.1 10 2h4l.8 2.1 2 .9 2.1-.9 2 3.5-1.6 1.4.2 2.2 1.7 1.3-2 3.5-2.2-.7-1.8 1.3-.4 2.3h-4l-.5-2.3-1.8-1.2-2.1.7-2-3.5L5.9 11 6 8.9 4.3 7.5l2-3.5 2.1.9.8-.8Z"/><circle cx="12" cy="10.8" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+        <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.3 2.3 0 1 1 3.5 2c-.9.6-1.3 1-1.3 2M12 17h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+        <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+        <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+        <symbol id="i-link" viewBox="0 0 24 24"><path d="m9.5 14.5 5-5M7.6 16.4l-1.2 1.2a3.5 3.5 0 0 1-5-5l3.1-3.1a3.5 3.5 0 0 1 5 0M16.4 7.6l1.2-1.2a3.5 3.5 0 0 1 5 5l-3.1 3.1a3.5 3.5 0 0 1-5 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+        <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+        <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+        <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M19 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+        <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3m3 0-1 14H7L6 7m4 4v6m4-6v6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+        <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+        <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 4h16v12H9l-5 4V4Z"/><path d="M8 9h8M8 12h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+        <symbol id="i-drive" viewBox="0 0 24 24"><path d="m9.3 3-6 10.5L6.5 19h12.2l3-5.5L15.7 3H9.3Zm0 0 6.2 10.5m6.2 0H9.5L6.5 19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+        <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 10h18" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 14h3v3H8z"/></symbol>
+        <symbol id="i-odoo" viewBox="0 0 24 24"><circle cx="6" cy="12" r="4"/><circle cx="18" cy="12" r="4"/><path d="M10 12h4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+        <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Z"/></symbol>
+        <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2c.7 5.3 2.7 7.3 8 8-5.3.7-7.3 2.7-8 8-.7-5.3-2.7-7.3-8-8 5.3-.7 7.3-2.7 8-8Z"/><path d="M19 16c.3 2 1 2.7 3 3-2 .3-2.7 1-3 3-.3-2-1-2.7-3-3 2-.3 2.7-1 3-3Z"/></symbol>
+      </defs>
+    </svg>
+
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="/" aria-label="Context Hub">
+          <span class="brand-mark"><svg><use href="#i-hub"></use></svg></span>
+          <span>Context<span>Hub</span></span>
+        </a>
+        <nav class="main-nav" aria-label="Navigation principale">
+          <p class="nav-label">Espace de travail</p>
+          <button class="nav-item active" data-nav="dashboard"><svg><use href="#i-grid"></use></svg><span>Vue d’ensemble</span></button>
+          <button class="nav-item" data-nav="contexts"><svg><use href="#i-layers"></use></svg><span>Tous les contextes</span><span class="nav-count" id="nav-count">0</span></button>
+          <button class="nav-item" data-nav="favorites"><svg><use href="#i-star"></use></svg><span>À suivre</span></button>
+          <button class="nav-item" data-nav="recent"><svg><use href="#i-clock"></use></svg><span>Activité récente</span></button>
+          <p class="nav-label sources-label">Sources</p>
+          <button class="nav-item source-nav" data-source="gmail"><span class="source-dot gmail"><svg><use href="#i-mail"></use></svg></span><span>Gmail</span><span class="nav-count source-count" data-count="gmail">0</span></button>
+          <button class="nav-item source-nav" data-source="chat"><span class="source-dot chat"><svg><use href="#i-chat"></use></svg></span><span>Google Chat</span><span class="nav-count source-count" data-count="chat">0</span></button>
+          <button class="nav-item source-nav" data-source="drive"><span class="source-dot drive"><svg><use href="#i-drive"></use></svg></span><span>Google Drive</span><span class="nav-count source-count" data-count="drive">0</span></button>
+          <button class="nav-item source-nav" data-source="calendar"><span class="source-dot calendar"><svg><use href="#i-calendar"></use></svg></span><span>Calendar</span><span class="nav-count source-count" data-count="calendar">0</span></button>
+          <button class="nav-item source-nav" data-source="odoo"><span class="source-dot odoo"><svg><use href="#i-odoo"></use></svg></span><span>Odoo</span><span class="nav-count source-count" data-count="odoo">0</span></button>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="nav-item"><svg><use href="#i-help"></use></svg><span>Centre d’aide</span></button>
+          <button class="nav-item"><svg><use href="#i-settings"></use></svg><span>Paramètres</span></button>
+          <div class="profile-card">
+            <div class="avatar avatar-purple">CM</div>
+            <div><strong>Camille Martin</strong><small>Administratrice</small></div>
+            <button aria-label="Options">•••</button>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-area">
+        <header class="topbar">
+          <button class="mobile-menu" id="mobile-menu" aria-label="Ouvrir le menu"><svg><use href="#i-grid"></use></svg></button>
+          <label class="global-search">
+            <svg><use href="#i-search"></use></svg>
+            <input id="global-search" type="search" placeholder="Rechercher un contexte, une ressource, un client…" autocomplete="off" />
+            <kbd>⌘ K</kbd>
+          </label>
+          <div class="top-actions">
+            <span class="sync-pill"><i></i> 5 sources connectées</span>
+            <button class="icon-btn" aria-label="Notifications"><span class="notification-dot"></span><svg><use href="#i-clock"></use></svg></button>
+            <div class="avatar">CM</div>
+          </div>
+        </header>
+
+        <section class="content">
+          <div class="hero-row">
+            <div>
+              <div class="eyebrow"><svg><use href="#i-spark"></use></svg> VOTRE ESPACE CONTEXTUEL</div>
+              <h1>Bonjour Camille <span>👋</span></h1>
+              <p>Tout ce qui compte, regroupé au bon endroit.</p>
+            </div>
+            <button class="primary-btn" id="new-context"><svg><use href="#i-plus"></use></svg>Nouveau contexte</button>
+          </div>
+
+          <div class="stats-grid" id="stats-grid">
+            <article class="stat-card"><div class="stat-icon purple"><svg><use href="#i-layers"></use></svg></div><div><span>Contextes actifs</span><strong id="stat-active">—</strong><small><b>Transverses</b> à vos outils</small></div></article>
+            <article class="stat-card"><div class="stat-icon blue"><svg><use href="#i-link"></use></svg></div><div><span>Ressources liées</span><strong id="stat-resources">—</strong><small>Sans duplication</small></div></article>
+            <article class="stat-card"><div class="stat-icon orange"><svg><use href="#i-clock"></use></svg></div><div><span>Échéances proches</span><strong id="stat-due">—</strong><small>Dans les 7 prochains jours</small></div></article>
+            <article class="stat-card source-stat"><div class="mini-source-stack"><span class="gmail"><svg><use href="#i-mail"></use></svg></span><span class="drive"><svg><use href="#i-drive"></use></svg></span><span class="calendar"><svg><use href="#i-calendar"></use></svg></span></div><div><span>Sources connectées</span><strong>5 <em>/ 5</em></strong><small><i></i> Toutes opérationnelles</small></div></article>
+          </div>
+
+          <div class="section-head">
+            <div><h2 id="list-title">Contextes récents</h2><p id="list-subtitle">Vos sujets les plus récemment mis à jour</p></div>
+            <div class="view-actions">
+              <button class="filter-btn active" data-status="">Tous</button>
+              <button class="filter-btn" data-status="active">Actifs</button>
+              <button class="filter-btn" data-status="watching">À suivre</button>
+              <button class="see-all" id="see-all">Tout afficher <svg><use href="#i-chevron"></use></svg></button>
+            </div>
+          </div>
+
+          <div class="active-filter hidden" id="active-filter"><span></span><button aria-label="Effacer le filtre"><svg><use href="#i-close"></use></svg></button></div>
+          <div class="contexts-grid" id="contexts-grid" aria-live="polite">
+            <div class="context-skeleton"></div><div class="context-skeleton"></div><div class="context-skeleton"></div>
+          </div>
+          <div class="empty-state hidden" id="empty-state">
+            <div><svg><use href="#i-search"></use></svg></div>
+            <h3>Aucun contexte trouvé</h3>
+            <p>Essayez d’autres mots-clés ou créez un nouveau contexte.</p>
+            <button class="secondary-btn" id="empty-create">Créer un contexte</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="drawer-backdrop hidden" id="drawer-backdrop"></div>
+    <aside class="context-drawer" id="context-drawer" aria-hidden="true" aria-label="Détail du contexte">
+      <div id="drawer-content"></div>
+    </aside>
+
+    <div class="modal-backdrop hidden" id="context-modal">
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="context-modal-title">
+        <div class="modal-head"><div><span class="modal-kicker">NOUVEAU</span><h2 id="context-modal-title">Créer un contexte</h2></div><button class="icon-btn modal-close" aria-label="Fermer"><svg><use href="#i-close"></use></svg></button></div>
+        <form id="context-form">
+          <label>Nom du contexte<input name="title" required minlength="2" placeholder="Ex. Renouvellement · Client Horizon" /></label>
+          <label>Résumé<textarea name="summary" rows="3" placeholder="Décrivez brièvement l’objectif et le périmètre…"></textarea></label>
+          <div class="form-row">
+            <label>Type<select name="context_type"><option value="project">Projet</option><option value="client">Client</option><option value="opportunity">Opportunité</option><option value="activity">Activité</option><option value="topic">Sujet</option></select></label>
+            <label>Priorité<select name="priority"><option value="normal">Normale</option><option value="high">Haute</option><option value="low">Basse</option></select></label>
+          </div>
+          <div class="form-row">
+            <label>Responsable<input name="owner_name" placeholder="Nom du responsable" /></label>
+            <label>Échéance<input name="due_at" type="date" /></label>
+          </div>
+          <label>Étiquettes <small>séparées par des virgules</small><input name="tags" placeholder="Enterprise, France, Renouvellement" /></label>
+          <div class="modal-actions"><button type="button" class="ghost-btn modal-cancel">Annuler</button><button type="submit" class="primary-btn"><span>Créer le contexte</span></button></div>
+        </form>
+      </section>
+    </div>
+
+    <div class="modal-backdrop hidden" id="resource-modal">
+      <section class="modal compact" role="dialog" aria-modal="true" aria-labelledby="resource-modal-title">
+        <div class="modal-head"><div><span class="modal-kicker">RACCOURCI</span><h2 id="resource-modal-title">Lier une ressource</h2></div><button class="icon-btn modal-close" aria-label="Fermer"><svg><use href="#i-close"></use></svg></button></div>
+        <form id="resource-form">
+          <div class="source-picker" role="radiogroup" aria-label="Source">
+            <label class="selected gmail"><input type="radio" name="source" value="gmail" checked /><svg><use href="#i-mail"></use></svg><span>Gmail</span></label>
+            <label class="chat"><input type="radio" name="source" value="chat" /><svg><use href="#i-chat"></use></svg><span>Chat</span></label>
+            <label class="drive"><input type="radio" name="source" value="drive" /><svg><use href="#i-drive"></use></svg><span>Drive</span></label>
+            <label class="calendar"><input type="radio" name="source" value="calendar" /><svg><use href="#i-calendar"></use></svg><span>Calendar</span></label>
+            <label class="odoo"><input type="radio" name="source" value="odoo" /><svg><use href="#i-odoo"></use></svg><span>Odoo</span></label>
+          </div>
+          <label>Titre de la ressource<input name="title" required placeholder="Ex. Proposition commerciale v4" /></label>
+          <label>Lien permanent<input name="url" required type="url" placeholder="https://…" /></label>
+          <label>Identifiant source <small>pour éviter les doublons</small><input name="external_id" required placeholder="ID du fil, fichier, événement ou enregistrement" /></label>
+          <label>Note contextuelle<textarea name="excerpt" rows="2" placeholder="Pourquoi cette ressource est utile…"></textarea></label>
+          <div class="modal-actions"><button type="button" class="ghost-btn modal-cancel">Annuler</button><button type="submit" class="primary-btn"><svg><use href="#i-link"></use></svg><span>Lier la ressource</span></button></div>
+        </form>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"><span class="toast-icon">✓</span><span id="toast-message">Action effectuée</span></div>
+    <script src="/assets/app.js" defer></script>
+  </body>
+</html>
