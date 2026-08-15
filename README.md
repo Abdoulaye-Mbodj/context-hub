@@ -2,13 +2,12 @@
 
 Context Hub centralise les **raccourcis et métadonnées** de Gmail, Google Chat, Google Drive, Google Calendar et Odoo autour de contextes métier. Les emails, fichiers, messages, événements et fiches CRM restent dans leurs applications d’origine.
 
-L’expérience repose sur trois surfaces complémentaires :
+L’expérience repose sur deux surfaces complémentaires :
 
-- l’interface web du Hub, dédiée à la recherche et au CRUD des contextes ainsi qu’à la configuration des connexions ;
-- un Chromium Docker affiché dans le Hub, pour utiliser les applications sans quitter Context Hub ;
+- l’interface web du Hub, qui fournit des vues API natives pour Gmail, Chat, Drive, Calendar et Odoo ainsi que le CRUD des contextes ;
 - une extension Chrome/Edge qui affiche Context Hub dans un panneau latéral à côté des interfaces officielles de Gmail, Chat, Drive, Calendar et Odoo.
 
-Cette architecture conserve l’expérience complète et la session de chaque application. Gmail et les autres applications Google ne peuvent pas être intégrés de manière fiable dans une `iframe` classique à cause de leurs règles de sécurité et d’authentification ; le navigateur Docker diffuse donc une vraie session Chromium dans la page.
+L’interface web n’utilise ni `iframe`, ni navigateur distant, ni redirection vers les applications sources. Les listes, détails et actions sont reconstruits dans Context Hub à partir des API officielles.
 
 ## Lancement avec Docker Desktop
 
@@ -33,7 +32,7 @@ La base est conservée dans le volume Docker `context-hub_context_hub_data`. La 
 
 ### Inspection TLS locale
 
-Si la construction échoue avec `CERTIFICATE_VERIFY_FAILED`, un antivirus ou proxy inspecte probablement TLS. Exporter son autorité racine publique au format PEM dans `certs/` avec l’extension `.crt`, puis relancer `docker compose up --build`. Les images de l’API et de Chromium ajoutent ces certificats à leurs magasins de confiance. Les certificats locaux sont ignorés par Git et ne doivent jamais contenir de clé privée.
+Si la construction échoue avec `CERTIFICATE_VERIFY_FAILED`, un antivirus ou proxy inspecte probablement TLS. Exporter son autorité racine publique au format PEM dans `certs/` avec l’extension `.crt`, puis relancer `docker compose up --build`. L’image de l’API ajoute ces certificats à son magasin de confiance. Les certificats locaux sont ignorés par Git et ne doivent jamais contenir de clé privée.
 
 ## Utilisation
 
@@ -45,17 +44,13 @@ La page principale permet de :
 - rechercher et filtrer les contextes ;
 - supprimer directement une ligne, ou sélectionner plusieurs contextes pour les supprimer ensemble ;
 - rattacher ou retirer un raccourci vers une ressource source ;
-- ouvrir la ressource dans le navigateur intégré ou, au choix, dans le mode extension.
+- ouvrir la ressource dans sa vue interne Context Hub.
 
 Une référence contient uniquement la source, l’identifiant stable, le lien profond, le titre et quelques métadonnées. Le contenu complet n’est pas recopié.
 
-### Navigateur intégré Docker
+### Applications connectées
 
-Par défaut, les boutons Gmail, Chat, Drive, Calendar et Odoo ouvrent désormais un Chromium exécuté dans le conteneur `chromium` et rendu directement dans l’interface Context Hub. Une colonne de contextualisation reste visible à droite pour rechercher un contexte, en créer un et rattacher la page affichée. La détection de la page courante est actualisée automatiquement.
-
-Le profil Chromium est conservé dans le volume `context-hub_context_browser_data`. La première ouverture demande donc de se connecter à Google et Odoo dans ce navigateur, indépendamment de la session Chrome/Edge locale. Le premier démarrage télécharge également l’image Chromium et peut prendre plusieurs minutes.
-
-En local, le flux graphique est publié uniquement sur `127.0.0.1:3000`. Sur un VPS, Caddy le publie sous `/browser/` sur le même domaine ; il faut impérativement protéger le domaine complet par le SSO avant d’y enregistrer une session Google ou Odoo.
+Les boutons Gmail, Chat, Drive, Calendar et Odoo ouvrent des vues internes liste/détail. Elles permettent de créer, consulter, modifier ou supprimer les éléments autorisés par l’API et les droits du compte. Gmail distingue une conversation d’un message individuel ; Google Chat ne rattache que des messages ; Drive inclut Mon Drive, les éléments partagés avec l’utilisateur et les Drive partagés accessibles.
 
 ### Applications natives et extension
 
@@ -86,7 +81,9 @@ Les secrets sont chiffrés en base avec `APP_SECRET_KEY`. Ils ne sont jamais ren
 6. Copier le Client ID et le Client secret dans le formulaire, enregistrer, puis cliquer sur **Connecter Google**.
 7. Autoriser la fenêtre OAuth, puis lancer une synchronisation pour vérifier les accès.
 
-Le connecteur demande des accès en lecture aux fils Gmail, métadonnées Drive, événements Calendar et espaces Chat. Ces accès alimentent le sélecteur de ressources du Hub ; ils ne créent pas la session web du Chromium intégré. Certains scopes peuvent exiger une validation Google pour une application externe.
+Le connecteur demande des accès de lecture et d’écriture à Gmail, Drive, Calendar et Chat. Ils alimentent les vues internes et leurs actions CRUD. Après une mise à niveau, il faut relancer le consentement OAuth pour accepter les nouveaux scopes. Certains scopes peuvent exiger une validation Google pour une application externe.
+
+Pour créer, modifier ou supprimer des messages Google Chat, configurez également l’application Google Chat du projet Google Cloud (nom, icône et description). Les actions d’écriture restent limitées par les droits Google de l’utilisateur et, notamment, aux messages qu’il est autorisé à modifier ou supprimer.
 
 ### Odoo
 
@@ -109,11 +106,6 @@ Les variables sont documentées dans [`.env.example`](./.env.example).
 | `APP_PUBLIC_URL` | URL absolue utilisée par OAuth, les liens et les intégrations |
 | `POSTGRES_PASSWORD` | Mot de passe PostgreSQL |
 | `APP_SECRET_KEY` | Clé stable d’au moins 32 caractères pour chiffrer les identifiants |
-| `EMBEDDED_BROWSER_ENABLED` | Active le navigateur Chromium intégré |
-| `EMBEDDED_BROWSER_PUBLIC_URL` | URL chargée dans la vue intégrée |
-| `CONTEXT_BROWSER_PORT` | Port local de l’interface Chromium, `3000` par défaut |
-| `CONTEXT_BROWSER_USER` | Utilisateur HTTP facultatif du navigateur |
-| `CONTEXT_BROWSER_PASSWORD` | Mot de passe HTTP facultatif ; laisser vide derrière le SSO |
 | `DEMO_MODE` | Charge les exemples lorsque la base est vide |
 | `CORS_ORIGINS` | Origines web autorisées, séparées par des virgules |
 | `INTEGRATION_API_KEY` | Protège les API entrantes génériques et Odoo |
@@ -171,7 +163,6 @@ Mettre ensuite l’URL HTTPS du VPS dans les réglages de l’extension et accor
 Le MVP n’intègre pas encore de fournisseur d’identité propre au Hub. Avant une exposition métier :
 
 - placer l’interface et l’API derrière le SSO/OIDC de l’organisation ;
-- protéger également `/browser/`, car le volume Chromium contient des cookies et sessions applicatives ;
 - utiliser des secrets uniques et gérer leur rotation avec une procédure de reconnexion ;
 - réserver l’application OAuth Google aux utilisateurs autorisés et limiter ses scopes ;
 - ne jamais exposer le port PostgreSQL ;

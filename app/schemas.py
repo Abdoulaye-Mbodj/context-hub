@@ -142,7 +142,3 @@ class ConnectorRead(BaseModel):
     last_sync_at: datetime | None
     updated_at: datetime | None
     configuration: dict[str, Any]
-
-
-class BrowserNavigate(BaseModel):
-    url: HttpUrl

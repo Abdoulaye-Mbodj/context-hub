@@ -14,56 +14,9 @@ services:
       INTEGRATION_API_KEY: ${INTEGRATION_API_KEY:-}
       ODOO_WEBHOOK_SECRET: ${ODOO_WEBHOOK_SECRET:-}
       APP_SECRET_KEY: ${APP_SECRET_KEY:-local-development-key-change-me}
-      EMBEDDED_BROWSER_ENABLED: ${EMBEDDED_BROWSER_ENABLED:-true}
-      EMBEDDED_BROWSER_PUBLIC_URL: ${EMBEDDED_BROWSER_PUBLIC_URL:-http://localhost:3000}
-      EMBEDDED_BROWSER_CDP_URL: http://chromium:9223
     depends_on:
       db:
         condition: service_healthy
-      chromium-cdp:
-        condition: service_healthy
-    restart: unless-stopped
-
-  chromium:
-    build:
-      context: .
-      dockerfile: docker/chromium/Dockerfile
-    image: context-hub-chromium
-    environment:
-      PUID: "1000"
-      PGID: "1000"
-      TZ: ${TZ:-Atlantic/Reykjavik}
-      TITLE: Context Hub Browser
-      CUSTOM_USER: ${CONTEXT_BROWSER_USER:-context-hub}
-      PASSWORD: ${CONTEXT_BROWSER_PASSWORD:-}
-      CHROME_CLI: >-
-        --remote-debugging-address=0.0.0.0
-        --remote-debugging-port=9222
-        --remote-allow-origins=*
-        https://mail.google.com/
-    volumes:
-      - context_browser_data:/config
-    ports:
-      - "127.0.0.1:${CONTEXT_BROWSER_PORT:-3000}:3000"
-    shm_size: "1gb"
-    security_opt:
-      - seccomp:unconfined
-    restart: unless-stopped
-
-  chromium-cdp:
-    image: alpine/socat:1.8.0.3
-    command:
-      - tcp-listen:9223,fork,reuseaddr,bind=0.0.0.0
-      - tcp-connect:127.0.0.1:9222
-    network_mode: service:chromium
-    depends_on:
-      - chromium
-    healthcheck:
-      test: ["CMD-SHELL", "nc -z 127.0.0.1 9222 && nc -z 127.0.0.1 9223"]
-      interval: 2s
-      timeout: 2s
-      start_period: 5s
-      retries: 30
     restart: unless-stopped
 
   db:
@@ -83,4 +36,3 @@ services:
 
 volumes:
   context_hub_data:
-  context_browser_data:

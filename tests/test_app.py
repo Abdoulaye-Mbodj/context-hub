@@ -11,8 +11,9 @@ os.environ["APP_SECRET_KEY"] = "test-only-secret-key-with-at-least-32-characters
 
 from fastapi.testclient import TestClient
 
-from app import browser as browser_module
+from app.connectors import GOOGLE_SCOPES
 from app.main import app
+from app.source_apps import _drive_list
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
@@ -142,7 +143,8 @@ def test_hub_navigation_is_never_intercepted_by_extension():
     page = (ROOT_DIR / "app" / "static" / "index.html").read_text(encoding="utf-8")
     script = (ROOT_DIR / "app" / "static" / "assets" / "app.js").read_text(encoding="utf-8")
     worker = (ROOT_DIR / "browser-extension" / "service-worker.js").read_text(encoding="utf-8")
-    assert "integrated-app-button" in page
+    assert "source-app-button" in page
+    assert "embedded-browser" not in page
     assert "open-extension-mode" not in page
     assert "context-hub-open-app" not in script
     assert '"context-hub-web"' in worker
@@ -167,68 +169,56 @@ def test_contexts_can_be_deleted_in_bulk():
         assert not remaining.intersection(ids)
 
 
-def test_embedded_browser_navigation_uses_managed_google_target(monkeypatch):
-    calls = []
+def test_chromium_is_fully_removed_from_runtime():
+    compose = (ROOT_DIR / "compose.yaml").read_text(encoding="utf-8")
+    main = (ROOT_DIR / "app" / "main.py").read_text(encoding="utf-8")
+    assert "chromium" not in compose.lower()
+    assert "browser_router" not in main
+    assert not (ROOT_DIR / "app" / "browser.py").exists()
 
-    def fake_cdp(method, path, timeout=4.0):
-        calls.append((method, path, timeout))
-        if method == "PUT":
-            return {
-                "id": "target-mail",
-                "type": "page",
-                "title": "Boîte de réception - Gmail",
-                "url": "https://mail.google.com/mail/u/0/#inbox",
-            }
-        return None
 
-    monkeypatch.setattr(browser_module, "_cdp_request", fake_cdp)
-    monkeypatch.setattr(browser_module, "_managed_target_id", None)
+def test_native_application_routes_require_connected_sources():
     with TestClient(app) as client:
-        response = client.post("/api/v1/browser/navigate", json={"url": "https://mail.google.com/"})
-        assert response.status_code == 200
-        assert response.json()["current"]["source"] == "gmail"
-    assert calls[0][0] == "PUT"
+        google = client.get("/api/v1/apps/gmail/items")
+        assert google.status_code in {400, 502}
+        assert "Google" in google.json()["detail"] or "gmail" in google.json()["detail"].lower()
 
 
-def test_embedded_browser_does_not_misclassify_external_page_as_odoo(monkeypatch):
-    monkeypatch.setattr(
-        browser_module,
-        "_current_target",
-        lambda: {
-            "id": "target-marketing",
-            "type": "page",
-            "title": "Google Workspace",
-            "url": "https://workspace.google.com/intl/fr/gmail/",
-        },
-    )
-    with TestClient(app) as client:
-        response = client.get("/api/v1/browser/current")
-        assert response.status_code == 200
-        assert response.json()["resource"] is None
+def test_native_google_scopes_allow_crud_and_chat_messages():
+    assert "https://www.googleapis.com/auth/gmail.modify" in GOOGLE_SCOPES
+    assert "https://www.googleapis.com/auth/drive" in GOOGLE_SCOPES
+    assert "https://www.googleapis.com/auth/calendar" in GOOGLE_SCOPES
+    assert "https://www.googleapis.com/auth/chat.messages" in GOOGLE_SCOPES
 
 
-def test_cdp_accepts_chromium_plain_text_with_json_content_type(monkeypatch):
+def test_drive_listing_includes_shared_drives_and_shared_with_me():
     class FakeResponse:
-        content = b"Target activated"
-        text = "Target activated"
-        headers = {"content-type": "application/json; charset=UTF-8"}
-
-        @staticmethod
-        def raise_for_status():
+        def raise_for_status(self):
             return None
 
-        @staticmethod
-        def json():
-            raise ValueError("not JSON")
+        def json(self):
+            return {"files": []}
 
-    monkeypatch.setattr(browser_module.httpx, "request", lambda *args, **kwargs: FakeResponse())
-    assert browser_module._cdp_request("GET", "/json/activate/target") == "Target activated"
+    class FakeClient:
+        params = None
+
+        def get(self, _url, params):
+            self.params = params
+            return FakeResponse()
+
+    client = FakeClient()
+    assert _drive_list(client, "", 20, "shared") == []
+    assert client.params["corpora"] == "user"
+    assert client.params["includeItemsFromAllDrives"] == "true"
+    assert client.params["supportsAllDrives"] == "true"
+    assert "sharedWithMe" in client.params["q"]
 
 
-def test_chromium_is_supervised_and_required_before_app_startup():
-    compose = (ROOT_DIR / "compose.yaml").read_text(encoding="utf-8")
-    watchdog = (ROOT_DIR / "docker" / "chromium" / "chromium-watchdog.sh").read_text(encoding="utf-8")
-    assert "chromium-cdp:" in compose
-    assert "condition: service_healthy" in compose
-    assert "context-hub-chromium-watchdog" in watchdog or "wrapped-chromium" in watchdog
-    assert "while true" in watchdog
+def test_native_ui_has_preview_and_no_embedded_source_application():
+    page = (ROOT_DIR / "app" / "static" / "index.html").read_text(encoding="utf-8")
+    script = (ROOT_DIR / "app" / "static" / "assets" / "app.js").read_text(encoding="utf-8")
+    assert 'id="resource-preview"' in page
+    assert "Conversation entière" in script
+    assert "Ce message uniquement" in script
+    assert "<iframe" not in page.lower()
+    assert "window.location =" not in script

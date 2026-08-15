@@ -14,9 +14,6 @@ class Settings(BaseSettings):
     integration_api_key: str = ""
     odoo_webhook_secret: str = ""
     app_secret_key: str = "local-development-key-change-me"
-    embedded_browser_enabled: bool = True
-    embedded_browser_public_url: str = "http://localhost:3000"
-    embedded_browser_cdp_url: str = "http://chromium:9223"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

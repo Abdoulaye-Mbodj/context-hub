@@ -22,10 +22,11 @@ GOOGLE_SCOPES = [
     "openid",
     "email",
     "profile",
-    "https://www.googleapis.com/auth/gmail.readonly",
-    "https://www.googleapis.com/auth/drive.metadata.readonly",
-    "https://www.googleapis.com/auth/calendar.readonly",
+    "https://www.googleapis.com/auth/gmail.modify",
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/calendar",
     "https://www.googleapis.com/auth/chat.spaces.readonly",
+    "https://www.googleapis.com/auth/chat.messages",
 ]
 
 
@@ -45,10 +46,13 @@ def _safe_configuration(connector: Connector) -> dict[str, Any]:
         return {}
     if connector.provider == "google":
         client_id = config.get("client_id", "")
+        credentials = decrypt_mapping(connector.credentials_secret) if connector.credentials_secret else {}
+        granted_scopes = set(credentials.get("scope", "").split())
         return {
             "client_id": client_id,
             "client_id_hint": f"{client_id[:10]}…{client_id[-12:]}" if len(client_id) > 24 else client_id,
             "redirect_uri": f"{get_settings().app_public_url}/api/v1/connectors/google/callback",
+            "scope_upgrade_required": bool(connector.credentials_secret and not set(GOOGLE_SCOPES).issubset(granted_scopes)),
         }
     return {
         "url": config.get("url", ""),

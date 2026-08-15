@@ -1,10 +1,6 @@
 {$CONTEXT_HUB_DOMAIN} {
   encode zstd gzip
 
-  handle /browser/* {
-    reverse_proxy chromium:3000
-  }
-
   handle {
     reverse_proxy app:8080
   }

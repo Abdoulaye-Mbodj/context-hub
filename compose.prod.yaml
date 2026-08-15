@@ -3,11 +3,6 @@ services:
     environment:
       APP_PUBLIC_URL: https://${CONTEXT_HUB_DOMAIN}
       DEMO_MODE: "false"
-      EMBEDDED_BROWSER_PUBLIC_URL: https://${CONTEXT_HUB_DOMAIN}/browser/
-
-  chromium:
-    environment:
-      SUBFOLDER: /browser/
 
   caddy:
     image: caddy:2.8-alpine
