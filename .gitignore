@@ -7,3 +7,5 @@ __pycache__/
 context_hub.db
 .coverage
 htmlcov/
+certs/*.crt
+!certs/README.md

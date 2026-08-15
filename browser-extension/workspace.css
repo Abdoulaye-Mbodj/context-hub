@@ -1,0 +1,8 @@
+#app-launcher {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+#create-form button:disabled {
+  opacity: .55;
+  cursor: wait;
+}

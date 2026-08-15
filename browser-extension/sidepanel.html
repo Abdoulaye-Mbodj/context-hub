@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Context Hub</title><link rel="stylesheet" href="sidepanel.css"><link rel="stylesheet" href="workspace.css"></head>
+  <body>
+    <header><div class="brand"><span>⌘</span><b>Context<strong>Hub</strong></b></div><button id="show-settings" title="Paramètres">⚙</button></header>
+    <nav id="app-launcher">
+      <button data-app="hub" title="Contextes">H</button>
+      <button data-app="gmail" data-url="https://mail.google.com/" title="Gmail">M</button>
+      <button data-app="chat" data-url="https://chat.google.com/" title="Google Chat">C</button>
+      <button data-app="drive" data-url="https://drive.google.com/drive/my-drive" title="Google Drive">D</button>
+      <button data-app="calendar" data-url="https://calendar.google.com/calendar/u/0/r" title="Calendar">31</button>
+      <button data-app="odoo" title="Odoo">O</button>
+    </nav>
+
+    <main>
+      <section id="attach-view">
+        <div class="resource-card" id="resource-card"><span class="source-icon">↗</span><div><small>ÉLÉMENT AFFICHÉ</small><strong id="resource-title">Détection en cours…</strong><p id="resource-url"></p></div></div>
+        <label class="search"><span>⌕</span><input id="context-search" type="search" placeholder="Rechercher un contexte…"></label>
+        <div class="list-head"><b>Choisir un contexte</b><button id="refresh">↻</button></div>
+        <div id="context-list" class="context-list"><div class="skeleton"></div><div class="skeleton"></div></div>
+        <div id="empty" class="empty hidden">Aucun contexte trouvé.</div>
+        <button class="attach-button" id="attach" disabled>Rattacher au contexte sélectionné</button>
+        <button class="create-toggle" id="create-toggle">＋ Créer et rattacher un contexte</button>
+        <form id="create-form" class="hidden"><input name="title" required placeholder="Nom du contexte"><select name="context_type"><option value="project">Projet</option><option value="client">Client</option><option value="opportunity">Opportunité</option><option value="topic">Sujet</option></select><textarea name="summary" rows="2" placeholder="Résumé facultatif"></textarea><button type="submit">Créer et sélectionner</button></form>
+      </section>
+
+      <section id="settings-view" class="hidden">
+        <div class="settings-title"><button id="back">←</button><div><small>EXTENSION</small><h1>Connexion au Hub</h1></div></div>
+        <form id="settings-form"><label>URL du Context Hub<input name="hubUrl" type="url" required placeholder="http://localhost:8080"></label><label>URL Odoo <small>facultatif</small><input name="odooUrl" type="url" placeholder="https://mon-odoo.example.com"></label><button type="submit">Autoriser et enregistrer</button></form>
+        <div class="settings-help"><b>Un seul espace de travail</b><p>Les applications s’ouvrent dans le même onglet, tandis que ce panneau reste affiché. Vous gardez ainsi les interfaces officielles et la contextualisation au même endroit.</p></div>
+      </section>
+    </main>
+    <div id="toast" class="toast"><span>✓</span><b></b></div>
+    <script src="sidepanel.js"></script>
+  </body>
+</html>

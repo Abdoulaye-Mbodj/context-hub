@@ -1,0 +1,23 @@
+#context-hub-attach-button {
+  all: initial;
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2147483647;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 0 8px;
+  color: white;
+  background: #5b5ce2;
+  border: 0;
+  border-radius: 11px;
+  box-shadow: 0 10px 30px rgba(34, 35, 86, .3);
+  cursor: pointer;
+  font-family: Inter, Arial, sans-serif;
+  transition: transform .16s ease, background .16s ease;
+}
+#context-hub-attach-button:hover { background: #494acb; transform: translateY(-2px); }
+#context-hub-attach-button span { width: 25px; height: 25px; display: grid; place-items: center; color: #5b5ce2; background: white; border-radius: 7px; font: 800 13px/1 Inter, Arial, sans-serif; }
+#context-hub-attach-button b { color: white; font: 700 11px/1 Inter, Arial, sans-serif; }

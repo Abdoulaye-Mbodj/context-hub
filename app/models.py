@@ -75,3 +75,18 @@ class Activity(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
 
     context: Mapped[Context] = relationship(back_populates="activities")
+
+
+class Connector(Base):
+    __tablename__ = "connectors"
+
+    provider: Mapped[str] = mapped_column(String(32), primary_key=True)
+    status: Mapped[str] = mapped_column(String(24), default="disconnected", nullable=False)
+    configuration_secret: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    credentials_secret: Mapped[str] = mapped_column(Text, default="", nullable=False)
+    external_account: Mapped[str] = mapped_column(String(240), default="")
+    stats: Mapped[dict] = mapped_column(JSON, default=dict)
+    last_error: Mapped[str] = mapped_column(Text, default="")
+    last_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)

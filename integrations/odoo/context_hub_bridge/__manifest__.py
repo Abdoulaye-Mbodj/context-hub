@@ -10,6 +10,6 @@
         "views/res_config_settings_views.xml",
         "views/context_hub_views.xml"
     ],
-    "application": false,
-    "installable": true
+    "application": False,
+    "installable": True
 }

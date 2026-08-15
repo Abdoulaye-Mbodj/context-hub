@@ -1,12 +1,20 @@
+import json
 import os
+from io import BytesIO
+from pathlib import Path
+from zipfile import ZipFile
 
 os.environ["DATABASE_URL"] = "sqlite://"
 os.environ["DEMO_MODE"] = "true"
 os.environ["CORS_ORIGINS"] = "http://testserver"
+os.environ["APP_SECRET_KEY"] = "test-only-secret-key-with-at-least-32-characters"
 
 from fastapi.testclient import TestClient
 
+from app import browser as browser_module
 from app.main import app
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
 
 
 def test_health_and_seeded_dashboard():
@@ -72,3 +80,120 @@ def test_odoo_smart_link_redirects_existing_context():
         )
         assert response.status_code == 302
         assert "?context=" in response.headers["location"]
+
+
+def test_google_connector_configuration_is_encrypted_and_masked():
+    with TestClient(app) as client:
+        response = client.post(
+            "/api/v1/connectors/google/configure",
+            json={
+                "client_id": "123456789.apps.googleusercontent.com",
+                "client_secret": "GOCSPX-test-secret-value",
+            },
+        )
+        assert response.status_code == 200
+        connector = response.json()
+        assert connector["status"] == "configured"
+        assert connector["configured"] is True
+        assert "client_secret" not in connector["configuration"]
+        assert connector["configuration"]["redirect_uri"].endswith("/api/v1/connectors/google/callback")
+
+        listed = client.get("/api/v1/connectors").json()
+        google = next(item for item in listed if item["provider"] == "google")
+        assert google["configuration"]["client_id"] == "123456789.apps.googleusercontent.com"
+        assert "GOCSPX" not in str(google)
+
+
+def test_browser_extension_is_downloadable():
+    with TestClient(app) as client:
+        response = client.get("/browser-extension.zip")
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "application/zip"
+        with ZipFile(BytesIO(response.content)) as archive:
+            assert "browser-extension/manifest.json" in archive.namelist()
+            assert "browser-extension/sidepanel.html" in archive.namelist()
+            assert "browser-extension/hub-bridge.js" in archive.namelist()
+            assert "browser-extension/workspace.css" in archive.namelist()
+            manifest = json.loads(archive.read("browser-extension/manifest.json"))
+            assert manifest["version"] == "0.4.0"
+
+
+def test_extension_context_creation_keeps_form_reference_across_awaits():
+    script = (ROOT_DIR / "browser-extension" / "sidepanel.js").read_text(encoding="utf-8")
+    assert "const form = event.currentTarget" in script
+    assert "event.currentTarget.reset" not in script
+
+
+def test_contexts_can_be_deleted_in_bulk():
+    with TestClient(app) as client:
+        ids = []
+        for suffix in ("A", "B"):
+            response = client.post(
+                "/api/v1/contexts",
+                json={"title": f"Contexte temporaire {suffix}", "context_type": "project"},
+            )
+            assert response.status_code == 201
+            ids.append(response.json()["id"])
+        deleted = client.post("/api/v1/contexts/bulk-delete", json={"ids": ids})
+        assert deleted.status_code == 200
+        assert deleted.json() == {"deleted": 2}
+        remaining = {context["id"] for context in client.get("/api/v1/contexts").json()}
+        assert not remaining.intersection(ids)
+
+
+def test_embedded_browser_navigation_uses_managed_google_target(monkeypatch):
+    calls = []
+
+    def fake_cdp(method, path, timeout=4.0):
+        calls.append((method, path, timeout))
+        if method == "PUT":
+            return {
+                "id": "target-mail",
+                "type": "page",
+                "title": "Boîte de réception - Gmail",
+                "url": "https://mail.google.com/mail/u/0/#inbox",
+            }
+        return None
+
+    monkeypatch.setattr(browser_module, "_cdp_request", fake_cdp)
+    monkeypatch.setattr(browser_module, "_managed_target_id", None)
+    with TestClient(app) as client:
+        response = client.post("/api/v1/browser/navigate", json={"url": "https://mail.google.com/"})
+        assert response.status_code == 200
+        assert response.json()["current"]["source"] == "gmail"
+    assert calls[0][0] == "PUT"
+
+
+def test_embedded_browser_does_not_misclassify_external_page_as_odoo(monkeypatch):
+    monkeypatch.setattr(
+        browser_module,
+        "_current_target",
+        lambda: {
+            "id": "target-marketing",
+            "type": "page",
+            "title": "Google Workspace",
+            "url": "https://workspace.google.com/intl/fr/gmail/",
+        },
+    )
+    with TestClient(app) as client:
+        response = client.get("/api/v1/browser/current")
+        assert response.status_code == 200
+        assert response.json()["resource"] is None
+
+
+def test_cdp_accepts_chromium_plain_text_with_json_content_type(monkeypatch):
+    class FakeResponse:
+        content = b"Target activated"
+        text = "Target activated"
+        headers = {"content-type": "application/json; charset=UTF-8"}
+
+        @staticmethod
+        def raise_for_status():
+            return None
+
+        @staticmethod
+        def json():
+            raise ValueError("not JSON")
+
+    monkeypatch.setattr(browser_module.httpx, "request", lambda *args, **kwargs: FakeResponse())
+    assert browser_module._cdp_request("GET", "/json/activate/target") == "Target activated"

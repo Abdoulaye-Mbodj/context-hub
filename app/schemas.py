@@ -78,6 +78,10 @@ class ContextUpdate(BaseModel):
     due_at: datetime | None = None
 
 
+class ContextBulkDelete(BaseModel):
+    ids: list[str] = Field(min_length=1, max_length=100)
+
+
 class ContextListItem(BaseModel):
     id: str
     title: str
@@ -112,3 +116,31 @@ class DashboardStats(BaseModel):
 
 class OdooReferenceCreate(ResourceCreate):
     source: Literal["odoo"] = "odoo"
+
+
+class GoogleConnectorConfigure(BaseModel):
+    client_id: str = Field(min_length=10, max_length=500)
+    client_secret: str = Field(min_length=6, max_length=500)
+
+
+class OdooConnectorConfigure(BaseModel):
+    url: HttpUrl
+    database: str = Field(min_length=1, max_length=160)
+    username: str = Field(min_length=1, max_length=240)
+    api_key: str = Field(min_length=1, max_length=500)
+
+
+class ConnectorRead(BaseModel):
+    provider: Literal["google", "odoo"]
+    status: str
+    configured: bool
+    external_account: str
+    stats: dict[str, Any]
+    last_error: str
+    last_sync_at: datetime | None
+    updated_at: datetime | None
+    configuration: dict[str, Any]
+
+
+class BrowserNavigate(BaseModel):
+    url: HttpUrl

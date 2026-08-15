@@ -8,6 +8,7 @@ from app.database import get_db
 from app.models import Context, Resource
 from app.schemas import (
     ContextCreate,
+    ContextBulkDelete,
     ContextDetail,
     ContextListItem,
     ContextUpdate,
@@ -43,6 +44,15 @@ def contexts_list(
 @router.post("/contexts", response_model=ContextDetail, status_code=status.HTTP_201_CREATED)
 def contexts_create(payload: ContextCreate, db: Session = Depends(get_db)):
     return serialize_context(create_context(db, payload), detailed=True)
+
+
+@router.post("/contexts/bulk-delete")
+def contexts_bulk_delete(payload: ContextBulkDelete, db: Session = Depends(get_db)):
+    items = db.scalars(select(Context).where(Context.id.in_(payload.ids))).all()
+    for item in items:
+        db.delete(item)
+    db.commit()
+    return {"deleted": len(items)}
 
 
 @router.get("/contexts/{context_id}", response_model=ContextDetail)

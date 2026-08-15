@@ -1,6 +1,13 @@
 {$CONTEXT_HUB_DOMAIN} {
   encode zstd gzip
-  reverse_proxy app:8080
+
+  handle /browser/* {
+    reverse_proxy chromium:3000
+  }
+
+  handle {
+    reverse_proxy app:8080
+  }
 
   header {
     Strict-Transport-Security "max-age=31536000; includeSubDomains"
