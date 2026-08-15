@@ -66,9 +66,9 @@ En local, le flux graphique est publié uniquement sur `127.0.0.1:3000`. Sur un 
 5. Ouvrir l’icône Context Hub et épingler le panneau latéral.
 6. Dans les réglages du panneau, vérifier l’URL du Hub et renseigner l’URL Odoo.
 
-Le bouton **Mode extension** de la vue intégrée conserve l’expérience locale : Gmail, Chat, Drive, Calendar ou Odoo s’ouvrent dans l’onglet Chrome/Edge avec le panneau Context Hub. Le panneau permet de rechercher et sélectionner un contexte existant, ou d’en créer un qui sera immédiatement rattaché à l’élément affiché. Un bouton flottant **Rattacher au contexte** est aussi injecté dans les applications autorisées.
+L’extension est entièrement indépendante de l’interface web : les boutons Gmail, Chat, Drive, Calendar et Odoo du Hub ne l’appellent jamais. Pour l’utiliser avec un onglet Chrome/Edge normal, ouvrir ou épingler directement l’icône Context Hub dans la barre des extensions. Le panneau permet de rechercher et sélectionner un contexte existant, ou d’en créer un qui sera immédiatement rattaché à l’élément affiché. Un bouton flottant **Rattacher au contexte** est aussi injecté dans les applications autorisées.
 
-Après une mise à jour de l’extension non empaquetée, remplacer le dossier extrait puis cliquer sur **Actualiser** dans `chrome://extensions`. La page du Hub doit afficher `Active · v0.4.0`.
+Après une mise à jour de l’extension non empaquetée, remplacer le dossier extrait puis cliquer sur **Actualiser** dans `chrome://extensions`. La version courante est `0.4.1`.
 
 L’installation d’une extension non empaquetée est adaptée au développement et aux tests. Pour une organisation, publier l’extension de façon privée via Chrome Enterprise ou Microsoft Edge Add-ons.
 

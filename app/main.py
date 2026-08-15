@@ -33,7 +33,7 @@ async def lifespan(_app: FastAPI):
 settings = get_settings()
 app = FastAPI(
     title=settings.app_name,
-    version="0.4.0",
+    version="0.4.1",
     description="Couche de contextualisation transverse pour Google Workspace et Odoo.",
     lifespan=lifespan,
 )

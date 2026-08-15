@@ -9,8 +9,7 @@ const state = {
   selectedId: null,
   selectedIds: new Set(),
   view: "contexts",
-  extensionReady: false,
-  browser: { status: null, contexts: [], selectedId: null, resource: null, app: "", appUrl: "" },
+  browser: { status: null, contexts: [], selectedId: null, resource: null, app: "" },
 };
 let browserResourcePoll = null;
 
@@ -115,7 +114,7 @@ async function loadContexts() {
 
 function resourceItem(resource, contextId) {
   const meta = sourceMeta[resource.source] || { label: resource.source, icon: "i-link" };
-  return `<article class="resource-item"><span class="mini-source ${resource.source}">${icon(meta.icon)}</span><div class="resource-main"><a href="${escapeHtml(resource.url)}" data-workspace-url="${escapeHtml(resource.url)}" data-workspace-app="${resource.source}">${escapeHtml(resource.title)}</a><p>${escapeHtml(resource.excerpt || `${meta.label} · ${resource.resource_type}`)}</p></div><div class="resource-actions"><a href="${escapeHtml(resource.url)}" data-workspace-url="${escapeHtml(resource.url)}" data-workspace-app="${resource.source}" aria-label="Ouvrir">${icon("i-external")}</a><button data-delete-resource="${resource.id}" data-context="${contextId}" aria-label="Détacher">${icon("i-trash")}</button></div></article>`;
+  return `<article class="resource-item"><span class="mini-source ${resource.source}">${icon(meta.icon)}</span><div class="resource-main"><a href="${escapeHtml(resource.url)}" data-integrated-url="${escapeHtml(resource.url)}" data-integrated-app="${resource.source}">${escapeHtml(resource.title)}</a><p>${escapeHtml(resource.excerpt || `${meta.label} · ${resource.resource_type}`)}</p></div><div class="resource-actions"><a href="${escapeHtml(resource.url)}" data-integrated-url="${escapeHtml(resource.url)}" data-integrated-app="${resource.source}" aria-label="Ouvrir dans Context Hub">${icon("i-external")}</a><button data-delete-resource="${resource.id}" data-context="${contextId}" aria-label="Détacher">${icon("i-trash")}</button></div></article>`;
 }
 
 function renderDrawer(context) {
@@ -125,7 +124,7 @@ function renderDrawer(context) {
   $(".edit-context").addEventListener("click", () => openContextModal(context));
   $("#add-resource").addEventListener("click", () => openModal("resource-modal"));
   $$('[data-delete-resource]').forEach((button) => button.addEventListener("click", removeResource));
-  $$('[data-workspace-url]', $("#drawer-content")).forEach((link) => link.addEventListener("click", (event) => { event.preventDefault(); openEmbeddedUrl(link.dataset.workspaceUrl, link.dataset.workspaceApp); }));
+  $$('[data-integrated-url]', $("#drawer-content")).forEach((link) => link.addEventListener("click", (event) => { event.preventDefault(); openEmbeddedUrl(link.dataset.integratedUrl, link.dataset.integratedApp); }));
 }
 
 async function openContext(id) {
@@ -225,7 +224,7 @@ function showView(view) {
   $("#search").disabled = view !== "contexts";
   $("#create-context").classList.toggle("hidden", view === "applications");
   $$(".nav-button[data-view]").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
-  $$(".app-button").forEach((button) => button.classList.toggle("active", view === "applications" && button.dataset.app === state.browser.app));
+  $$(".integrated-app-button").forEach((button) => button.classList.toggle("active", view === "applications" && button.dataset.app === state.browser.app));
   $(".sidebar").classList.remove("open");
   if (view === "settings") loadConnectors();
   if (browserResourcePoll) { clearInterval(browserResourcePoll); browserResourcePoll = null; }
@@ -272,7 +271,7 @@ function renderConnector(connector) {
   } else {
     for (const field of ["url", "database", "username"]) if (connector.configuration[field]) $("#odoo-form").elements[field].value = connector.configuration[field];
     if (connected) $("#odoo-form").classList.add("hidden"); else $("#odoo-form").classList.remove("hidden");
-    const odooButton = $('.app-button[data-app="odoo"]');
+    const odooButton = $('.integrated-app-button[data-app="odoo"]');
     if (connector.configuration.url) odooButton.dataset.url = connector.configuration.url;
   }
 }
@@ -395,10 +394,7 @@ async function createBrowserContext(event) {
 
 async function openEmbeddedUrl(url, app) {
   state.browser.app = app;
-  state.browser.appUrl = url;
   $("#browser-app-title").textContent = sourceMeta[app]?.label || "Application";
-  $("#open-extension-mode").dataset.url = url;
-  $("#open-extension-mode").dataset.app = app;
   showView("applications");
   try {
     await waitForBrowser();
@@ -407,15 +403,6 @@ async function openEmbeddedUrl(url, app) {
     setTimeout(refreshBrowserResource, 1200);
     setTimeout(refreshBrowserResource, 3500);
   } catch (error) { toast(error.message, true); }
-}
-
-function openUrlInWorkspace(url, app) {
-  if (!state.extensionReady) {
-    showView("settings");
-    toast("Installez ou rechargez l’extension Context Hub pour ouvrir les applications dans l’espace de travail", true);
-    return;
-  }
-  window.postMessage({ type: "context-hub-open-app", app, url }, location.origin);
 }
 
 function openApplication(event) {
@@ -434,7 +421,7 @@ function bindEvents() {
   $$(".modal-close").forEach((button) => button.addEventListener("click", () => closeModal(button)));
   $$(".modal-backdrop").forEach((backdrop) => backdrop.addEventListener("mousedown", (event) => { if (event.target === backdrop) backdrop.classList.add("hidden"); }));
   $$(".nav-button[data-view]").forEach((button) => button.addEventListener("click", () => showView(button.dataset.view)));
-  $$(".app-button").forEach((button) => button.addEventListener("click", openApplication));
+  $$(".integrated-app-button").forEach((button) => button.addEventListener("click", openApplication));
   $("#select-all-contexts").addEventListener("change", (event) => { state.contexts.forEach((context) => { if (event.currentTarget.checked) state.selectedIds.add(context.id); else state.selectedIds.delete(context.id); }); renderContexts(); });
   $("#delete-selected-contexts").addEventListener("click", () => deleteContexts([...state.selectedIds]));
   $("#browser-refresh").addEventListener("click", refreshBrowserResource);
@@ -442,7 +429,6 @@ function bindEvents() {
   $("#browser-attach").addEventListener("click", attachBrowserResource);
   $("#browser-create-toggle").addEventListener("click", () => $("#browser-create-form").classList.toggle("hidden"));
   $("#browser-create-form").addEventListener("submit", createBrowserContext);
-  $("#open-extension-mode").addEventListener("click", () => { if (state.browser.appUrl) openUrlInWorkspace(state.browser.appUrl, state.browser.app); });
   $("#embedded-browser").addEventListener("load", () => setTimeout(() => $("#browser-loader").classList.add("hidden"), 500));
   let browserSearchTimer;
   $("#browser-context-search").addEventListener("input", (event) => { clearTimeout(browserSearchTimer); browserSearchTimer = setTimeout(() => loadBrowserContexts(event.target.value.trim()), 220); });
@@ -458,15 +444,12 @@ function bindEvents() {
   window.addEventListener("message", (event) => {
     if (event.origin !== location.origin) return;
     if (event.data?.type === "context-hub-oauth") { loadConnectors(); toast(event.data.success ? "Google Workspace connecté" : "Connexion Google interrompue", !event.data.success); }
-    if (event.data?.type === "context-hub-extension-ready") { state.extensionReady = true; $(".extension-state").classList.add("connected"); $("#extension-label").textContent = `Active${event.data.version ? ` · v${event.data.version}` : ""}`; }
-    if (event.data?.type === "context-hub-navigation-result" && !event.data.ok) toast(event.data.error || "Navigation impossible", true);
   });
   document.addEventListener("keydown", (event) => { if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); showView("contexts"); $("#search").focus(); } if (event.key === "Escape") { $$(".modal-backdrop:not(.hidden)").forEach((item) => item.classList.add("hidden")); if ($("#context-drawer").classList.contains("open")) closeDrawer(); } });
 }
 
 async function init() {
   bindEvents();
-  window.postMessage({ type: "context-hub-extension-ping" }, location.origin);
   await Promise.all([loadContexts(), loadConnectors()]);
   loadBrowserStatus().catch(() => {});
   const params = new URLSearchParams(location.search);

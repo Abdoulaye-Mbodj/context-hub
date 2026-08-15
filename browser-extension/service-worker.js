@@ -32,17 +32,16 @@ async function registerOdooScript(odooUrl) {
   });
 }
 
-async function registerHubScript(hubUrl) {
-  return replaceRegisteredScript("context-hub-web", hubUrl, {
-    js: ["hub-bridge.js"]
-  });
+async function unregisterLegacyHubScript() {
+  try { await chrome.scripting.unregisterContentScripts({ ids: ["context-hub-web"] }); }
+  catch (_) { /* Already absent. */ }
 }
 
 async function initialize() {
   await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
   const settings = await chrome.storage.local.get({ hubUrl: "http://localhost:8080", odooUrl: "" });
   await Promise.all([
-    registerHubScript(settings.hubUrl),
+    unregisterLegacyHubScript(),
     registerOdooScript(settings.odooUrl)
   ]);
 }
@@ -87,14 +86,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
-  if (message.type === "NAVIGATE_APP_IN_PLACE" && sender.tab?.id) {
-    const panelPromise = chrome.sidePanel.open({ windowId: sender.tab.windowId });
-    navigateTab(sender.tab, message.url, panelPromise)
-      .then(sendResponse)
-      .catch((error) => sendResponse({ ok: false, error: error.message }));
-    return true;
-  }
-
   if (message.type === "NAVIGATE_APP") {
     chrome.tabs.query({ active: true, currentWindow: true })
       .then(([tab]) => navigateTab(tab, message.url))
@@ -105,13 +96,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === "REGISTER_ODOO") {
     registerOdooScript(message.url)
-      .then(() => sendResponse({ ok: true }))
-      .catch((error) => sendResponse({ ok: false, error: error.message }));
-    return true;
-  }
-
-  if (message.type === "REGISTER_HUB") {
-    registerHubScript(message.url)
       .then(() => sendResponse({ ok: true }))
       .catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;

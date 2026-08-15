@@ -31,27 +31,20 @@ svg { width: 19px; height: 19px; fill: currentColor; flex: 0 0 auto; }
 .sidebar nav { flex: 1; overflow-y: auto; scrollbar-width: none; }
 .nav-label { margin: 0 11px 8px; color: #626a84; font-size: 9px; font-weight: 800; letter-spacing: 1.15px; text-transform: uppercase; }
 .applications-label { margin-top: 27px; }
-.nav-button, .app-button { width: 100%; height: 42px; display: flex; align-items: center; gap: 11px; padding: 0 11px; border: 0; border-radius: 9px; color: #a9b0c5; background: transparent; font-size: 12px; text-align: left; transition: .18s; }
-.nav-button:hover, .app-button:hover { color: white; background: #ffffff0e; }
-.app-button.active { color:white;background:#ffffff10;box-shadow:inset 3px 0 0 var(--primary); }
+.nav-button, .integrated-app-button { width: 100%; height: 42px; display: flex; align-items: center; gap: 11px; padding: 0 11px; border: 0; border-radius: 9px; color: #a9b0c5; background: transparent; font-size: 12px; text-align: left; transition: .18s; }
+.nav-button:hover, .integrated-app-button:hover { color: white; background: #ffffff0e; }
+.integrated-app-button.active { color:white;background:#ffffff10;box-shadow:inset 3px 0 0 var(--primary); }
 .nav-button.active { color: white; background: linear-gradient(90deg,#6263e83d,#6263e81c); box-shadow: inset 3px 0 #8485f5; }
 .nav-badge { margin-left: auto; min-width: 23px; padding: 2px 6px; color: #aeb0ff; background: #696aea29; border-radius: 10px; font-size: 9px; text-align: center; }
-.app-button { margin: 2px 0; height: 44px; }
-.app-button > span { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 8px; }
-.app-button > span svg { width: 15px; height: 15px; }
-.app-button b { font-weight: 500; }
-.app-button .open-icon { width: 12px; height: 12px; margin-left: auto; opacity: 0; transition: .18s; }
-.app-button:hover .open-icon { opacity: .75; }
-.app-button.gmail > span { color: #e5544e; background: #e5544e1b; }
-.app-button.chat > span { color: #28ad70; background: #28ad701b; }
-.app-button.drive > span, .app-button.calendar > span { color: #4e8ff0; background: #4e8ff01b; }
-.app-button.odoo > span { color: #bf7aaf; background: #bf7aaf1b; }
+.integrated-app-button { margin: 2px 0; height: 44px; }
+.integrated-app-button > span { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 8px; }
+.integrated-app-button > span svg { width: 15px; height: 15px; }
+.integrated-app-button b { font-weight: 500; }
+.integrated-app-button.gmail > span { color: #e5544e; background: #e5544e1b; }
+.integrated-app-button.chat > span { color: #28ad70; background: #28ad701b; }
+.integrated-app-button.drive > span, .integrated-app-button.calendar > span { color: #4e8ff0; background: #4e8ff01b; }
+.integrated-app-button.odoo > span { color: #bf7aaf; background: #bf7aaf1b; }
 .sidebar-bottom { padding-top: 12px; border-top: 1px solid #ffffff0e; }
-.extension-state { margin: 0 7px 10px; padding: 10px; background: #ffffff08; border: 1px solid #ffffff0b; border-radius: 9px; }
-.extension-state span { display: flex; align-items: center; gap: 7px; color: #c4cada; font-size: 9px; font-weight: 600; }
-.extension-state i { width: 7px; height: 7px; border-radius: 50%; background: #e5a745; box-shadow: 0 0 0 3px #e5a7451c; }
-.extension-state.connected i { background: #24b67c; }
-.extension-state small { display: block; margin: 4px 0 0 14px; color: #707995; font-size: 8px; }
 
 main { grid-column: 2; min-width: 0; }
 .topbar { position: sticky; top: 0; z-index: 20; height: 70px; display: flex; align-items: center; gap: 18px; padding: 0 40px; background: #ffffffed; border-bottom: 1px solid var(--line); backdrop-filter: blur(14px); }

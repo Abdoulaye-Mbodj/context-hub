@@ -41,15 +41,14 @@
           <button class="nav-button active" data-view="contexts"><svg><use href="#i-layers"></use></svg><span>Contextes</span><span class="nav-badge" id="context-count">0</span></button>
 
           <p class="nav-label applications-label">Applications</p>
-          <button class="app-button gmail" data-app="gmail" data-url="https://mail.google.com/"><span><svg><use href="#i-mail"></use></svg></span><b>Gmail</b><svg class="open-icon"><use href="#i-external"></use></svg></button>
-          <button class="app-button chat" data-app="chat" data-url="https://chat.google.com/"><span><svg><use href="#i-chat"></use></svg></span><b>Google Chat</b><svg class="open-icon"><use href="#i-external"></use></svg></button>
-          <button class="app-button drive" data-app="drive" data-url="https://drive.google.com/drive/my-drive"><span><svg><use href="#i-drive"></use></svg></span><b>Google Drive</b><svg class="open-icon"><use href="#i-external"></use></svg></button>
-          <button class="app-button calendar" data-app="calendar" data-url="https://calendar.google.com/calendar/u/0/r"><span><svg><use href="#i-calendar"></use></svg></span><b>Calendar</b><svg class="open-icon"><use href="#i-external"></use></svg></button>
-          <button class="app-button odoo" data-app="odoo"><span><svg><use href="#i-odoo"></use></svg></span><b>Odoo</b><svg class="open-icon"><use href="#i-external"></use></svg></button>
+          <button class="integrated-app-button gmail" data-app="gmail" data-url="https://mail.google.com/"><span><svg><use href="#i-mail"></use></svg></span><b>Gmail</b></button>
+          <button class="integrated-app-button chat" data-app="chat" data-url="https://chat.google.com/"><span><svg><use href="#i-chat"></use></svg></span><b>Google Chat</b></button>
+          <button class="integrated-app-button drive" data-app="drive" data-url="https://drive.google.com/drive/my-drive"><span><svg><use href="#i-drive"></use></svg></span><b>Google Drive</b></button>
+          <button class="integrated-app-button calendar" data-app="calendar" data-url="https://calendar.google.com/calendar/u/0/r"><span><svg><use href="#i-calendar"></use></svg></span><b>Calendar</b></button>
+          <button class="integrated-app-button odoo" data-app="odoo"><span><svg><use href="#i-odoo"></use></svg></span><b>Odoo</b></button>
         </nav>
 
         <div class="sidebar-bottom">
-          <div class="extension-state"><span><i></i> Extension navigateur</span><small id="extension-label">À installer</small></div>
           <button class="nav-button" data-view="settings"><svg><use href="#i-settings"></use></svg><span>Paramètres</span></button>
         </div>
       </aside>
@@ -88,7 +87,7 @@
         <section class="browser-page hidden" id="applications-view">
           <div class="browser-toolbar">
             <div><span class="eyebrow">NAVIGATEUR INTÉGRÉ</span><h1 id="browser-app-title">Applications</h1><p id="browser-status">Démarrage de Chromium…</p></div>
-            <div class="browser-toolbar-actions"><button class="secondary-button" id="browser-refresh"><svg><use href="#i-refresh"></use></svg>Actualiser la page détectée</button><button class="secondary-button" id="open-extension-mode" data-extension-launch><svg><use href="#i-extension"></use></svg>Mode extension</button></div>
+            <div class="browser-toolbar-actions"><button class="secondary-button" id="browser-refresh"><svg><use href="#i-refresh"></use></svg>Actualiser la page détectée</button></div>
           </div>
           <div class="browser-workspace">
             <div class="browser-frame-wrap">
@@ -149,7 +148,7 @@
 
           <article class="extension-card">
             <div class="extension-icon"><svg><use href="#i-extension"></use></svg></div>
-            <div><span class="eyebrow">ESPACE DE TRAVAIL UNIFIÉ</span><h2>Extension Context Hub pour Chrome / Edge</h2><p>Les boutons Gmail, Chat, Drive, Calendar et Odoo ouvrent leur interface officielle dans le même onglet. Le panneau Context Hub reste affiché pour rechercher un contexte, en créer un si nécessaire et rattacher immédiatement l’élément consulté.</p><ol><li><a class="extension-download" href="/browser-extension.zip">Téléchargez l’extension</a> puis décompressez l’archive.</li><li>Ouvrez <code>chrome://extensions</code> et activez le mode développeur.</li><li>Choisissez « Charger l’extension non empaquetée » puis le dossier <code>browser-extension</code>. Si elle est déjà installée, remplacez le dossier puis cliquez sur « Actualiser ».</li><li>Revenez sur Context Hub : l’état doit afficher <strong>Active · v0.4.0</strong>.</li></ol></div>
+            <div><span class="eyebrow">EXTENSION INDÉPENDANTE</span><h2>Extension Context Hub pour Chrome / Edge</h2><p>L’extension ne modifie jamais la navigation du Hub. Ouvrez-la directement depuis l’icône des extensions Chrome/Edge lorsque vous souhaitez afficher le panneau Context Hub à côté d’une application ouverte dans votre navigateur.</p><ol><li><a class="extension-download" href="/browser-extension.zip">Téléchargez l’extension</a> puis décompressez l’archive.</li><li>Ouvrez <code>chrome://extensions</code> et activez le mode développeur.</li><li>Choisissez « Charger l’extension non empaquetée » puis le dossier <code>browser-extension</code>. Si elle est déjà installée, remplacez le dossier puis cliquez sur « Actualiser ».</li><li>Épinglez l’icône Context Hub pour pouvoir ouvrir le panneau quand vous le souhaitez. Version actuelle : <strong>0.4.1</strong>.</li></ol></div>
           </article>
         </section>
       </main>

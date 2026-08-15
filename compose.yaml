@@ -20,6 +20,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      chromium-cdp:
+        condition: service_healthy
     restart: unless-stopped
 
   chromium:
@@ -56,6 +58,12 @@ services:
     network_mode: service:chromium
     depends_on:
       - chromium
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 9222 && nc -z 127.0.0.1 9223"]
+      interval: 2s
+      timeout: 2s
+      start_period: 5s
+      retries: 30
     restart: unless-stopped
 
   db:

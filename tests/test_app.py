@@ -112,16 +112,28 @@ def test_browser_extension_is_downloadable():
         with ZipFile(BytesIO(response.content)) as archive:
             assert "browser-extension/manifest.json" in archive.namelist()
             assert "browser-extension/sidepanel.html" in archive.namelist()
-            assert "browser-extension/hub-bridge.js" in archive.namelist()
+            assert "browser-extension/hub-bridge.js" not in archive.namelist()
             assert "browser-extension/workspace.css" in archive.namelist()
             manifest = json.loads(archive.read("browser-extension/manifest.json"))
-            assert manifest["version"] == "0.4.0"
+            assert manifest["version"] == "0.4.1"
 
 
 def test_extension_context_creation_keeps_form_reference_across_awaits():
     script = (ROOT_DIR / "browser-extension" / "sidepanel.js").read_text(encoding="utf-8")
     assert "const form = event.currentTarget" in script
     assert "event.currentTarget.reset" not in script
+
+
+def test_hub_navigation_is_never_intercepted_by_extension():
+    page = (ROOT_DIR / "app" / "static" / "index.html").read_text(encoding="utf-8")
+    script = (ROOT_DIR / "app" / "static" / "assets" / "app.js").read_text(encoding="utf-8")
+    worker = (ROOT_DIR / "browser-extension" / "service-worker.js").read_text(encoding="utf-8")
+    assert "integrated-app-button" in page
+    assert "open-extension-mode" not in page
+    assert "context-hub-open-app" not in script
+    assert '"context-hub-web"' in worker
+    assert "unregisterLegacyHubScript" in worker
+    assert "NAVIGATE_APP_IN_PLACE" not in worker
 
 
 def test_contexts_can_be_deleted_in_bulk():
@@ -197,3 +209,12 @@ def test_cdp_accepts_chromium_plain_text_with_json_content_type(monkeypatch):
 
     monkeypatch.setattr(browser_module.httpx, "request", lambda *args, **kwargs: FakeResponse())
     assert browser_module._cdp_request("GET", "/json/activate/target") == "Target activated"
+
+
+def test_chromium_is_supervised_and_required_before_app_startup():
+    compose = (ROOT_DIR / "compose.yaml").read_text(encoding="utf-8")
+    watchdog = (ROOT_DIR / "docker" / "chromium" / "chromium-watchdog.sh").read_text(encoding="utf-8")
+    assert "chromium-cdp:" in compose
+    assert "condition: service_healthy" in compose
+    assert "context-hub-chromium-watchdog" in watchdog or "wrapped-chromium" in watchdog
+    assert "while true" in watchdog
